@@ -1,2 +1,2 @@
-# officer-disqualifications-data-api
-Handles CRUD functions for officer disqualifications.
+# disqualified-officers-data-api
+Handles CRUD functions for disqualified officers.
