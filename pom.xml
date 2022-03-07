@@ -9,7 +9,8 @@
         <relativePath />
     </parent>
 	<artifactId>disqualified-officers-data-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>unversioned</version>
+    <packaging>jar</packaging>
 	<name>disqualified-officers-data-api</name>
 	<description>Service handling CRUD functions for officer disqualifications</description>
 	<properties>
@@ -20,6 +21,12 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+        
+        <!--sonar configuration-->
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml,
+            ${project.basedir}/target/site/jacoco-it/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
 	</properties>
     <dependencyManagement>
         <dependencies>
@@ -106,6 +113,15 @@
                         <version>1.1</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar-maven-plugin.version}</version>
             </plugin>
 		</plugins>
 	</build>
