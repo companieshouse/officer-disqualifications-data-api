@@ -1,0 +1,5 @@
+app_name: disqualified-officers-data-api
+group: api
+weight: 905
+routes:
+  1: ^/disqualified-officers-data-api/healthcheck
