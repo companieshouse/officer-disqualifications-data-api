@@ -15,7 +15,7 @@
 	<description>Service handling CRUD functions for officer disqualifications</description>
 	<properties>
 		<java.version>11</java.version>
-        <start-class>uk.gov.companieshouse.DisqualifiedOfficersDataApiApplication</start-class>
+        <start-class>uk.gov.companieshouse.disqualifiedofficersdataapi.DisqualifiedOfficersDataApiApplication</start-class>
         
         <spring-boot-dependencies.version>2.6.4</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>2.6.4</spring-boot-maven-plugin.version>
