@@ -72,7 +72,7 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>8.29</version>
+                            <version>7.5.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
