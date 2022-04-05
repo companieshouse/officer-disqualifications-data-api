@@ -3,3 +3,5 @@ group: api
 weight: 905
 routes:
   1: ^/disqualified-officers-data-api/healthcheck
+  2: ^/disqualified-officers-data-api/natural/(.*)/internal
+  3: ^/disqualified-officers-data-api/corporate/(.*)/internal
