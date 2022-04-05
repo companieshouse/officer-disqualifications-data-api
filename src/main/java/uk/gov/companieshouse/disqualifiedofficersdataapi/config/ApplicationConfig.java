@@ -12,14 +12,15 @@ import javax.annotation.PostConstruct;
 
 @Configuration
 public class ApplicationConfig {
+    
+    @Autowired
+    private MappingMongoConverter mappingMongoConverter;
 
     @Bean
     EnvironmentReader environmentReader() {
         return new EnvironmentReaderImpl();
     }
 
-    @Autowired
-    private MappingMongoConverter mappingMongoConverter;
 
     /**
      * Converter to remove _class from the mongo record during saving
