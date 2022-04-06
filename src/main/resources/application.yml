@@ -1,7 +1,7 @@
 management:
   endpoints:
     web:
-      base-path: /disqualified-officers-data-api
+      base-path: /disqualified-officers
       path-mapping:
         health: /healthcheck
 

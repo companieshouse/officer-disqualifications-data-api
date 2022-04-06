@@ -32,7 +32,7 @@ public class DisqualifiedOfficerController {
      * @param  requestBody  the request body containing disqualified officer data
      * @return  no response
      */
-    @PutMapping("/disqualified-officers-data-api/natural/{officer_id}/internal")
+    @PutMapping("/disqualified-officers/natural/{officer_id}/internal")
     public ResponseEntity<Void> naturalDisqualifiedOfficer(
             @RequestHeader("x-request-id") String contextId,
             @PathVariable("officer_id") String officerId,
@@ -56,7 +56,7 @@ public class DisqualifiedOfficerController {
      * @param  requestBody  the request body containing disqualified officer data
      * @return  no response
      */
-    @PutMapping("/disqualified-officers-data-api/corporate/{officer_id}/internal")
+    @PutMapping("/disqualified-officers/corporate/{officer_id}/internal")
     public ResponseEntity<Void> corporateDisqualifiedOfficer(
             @RequestHeader("x-request-id") String contextId,
             @PathVariable("officer_id") String officerId,
