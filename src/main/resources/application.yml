@@ -11,7 +11,7 @@ logger:
 spring:
   data:
     mongodb:
-      uri: ${MONGODB_URL:mongodb://mongo:27017/disqualifications?retryWrites=false}
+      uri: ${MONGODB_URL:mongodb://mongo:27017}/disqualifications?retryWrites=false
       name: disqualifications
 
 mongodb:
