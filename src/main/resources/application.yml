@@ -1,0 +1,20 @@
+management:
+  endpoints:
+    web:
+      base-path: /disqualified-officers
+      path-mapping:
+        health: /healthcheck
+
+logger:
+  namespace: disqualified-officer-data-api
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URL:mongodb://mongo:27017/disqualifications?retryWrites=false}
+      name: disqualifications
+
+mongodb:
+  disqualifications:
+    collection:
+      name: disqualifications
