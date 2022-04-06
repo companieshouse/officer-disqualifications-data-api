@@ -29,7 +29,5 @@ test-unit            Run unit tests
 | URL | Description |
 | --- | ----------- |
 | /disqualified-officers/healthcheck | Health check URL returns 200 if service is running |
-| --- | ----------- |
 | /disqualified-officers/natural/{officerId}/internal | Save or update a natural disqualified officer record |
-| --- | ----------- |
 | /disqualified-officers/corporate/{officerId}/internal | Save or update a corporate disqualified officer record |
