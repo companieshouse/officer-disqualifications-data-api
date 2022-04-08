@@ -17,7 +17,7 @@ public class LocalDateSerializer extends JsonSerializer<LocalDate> {
             jsonGenerator.writeNull();
         } else {
             DateTimeFormatter dateTimeFormatter =
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                    DateTimeFormatter.ofPattern("yyyy-MM-ddTHH:mm:ss.SSSZ");
             String format = localDate.atStartOfDay().format(dateTimeFormatter);
             jsonGenerator.writeRawValue("ISODate(\"" + format + "\")");
         }
