@@ -13,7 +13,6 @@ import uk.gov.companieshouse.api.disqualification.InternalDisqualificationApiInt
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Updated;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.transform.DisqualificationTransformer;
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.mongodb.assertions.Assertions.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
