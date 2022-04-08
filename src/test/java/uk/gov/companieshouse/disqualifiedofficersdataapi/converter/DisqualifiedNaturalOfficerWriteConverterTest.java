@@ -1,0 +1,33 @@
+package uk.gov.companieshouse.disqualifiedofficersdataapi.converter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.BasicDBObject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
+
+import static org.junit.Assert.assertTrue;
+
+public class DisqualifiedNaturalOfficerWriteConverterTest {
+
+    private static final String OFFICER_ID = "officerId";
+
+    private DisqualifiedNaturalOfficerWriteConverter converter;
+
+    @BeforeEach
+    public void setUp() {
+        converter = new DisqualifiedNaturalOfficerWriteConverter(new ObjectMapper());
+    }
+
+    @Test
+    public void canConvertDocument() {
+        NaturalDisqualificationApi api = new NaturalDisqualificationApi();
+        api.setPersonNumber(OFFICER_ID);
+
+        BasicDBObject object = converter.convert(api);
+
+        String json = object.toJson();
+        assertTrue(json.contains(OFFICER_ID));
+    }
+}
