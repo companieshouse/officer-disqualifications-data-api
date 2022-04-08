@@ -4,27 +4,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
+import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 
 import static org.junit.Assert.assertTrue;
 
-public class DisqualifiedOfficerWriteConverterTest {
+public class DisqualifiedCorporateOfficerWriteConverterTest {
 
     private static final String OFFICER_ID = "officerId";
 
-    private DisqualifiedOfficerWriteConverter converter;
+    private DisqualifiedCorporateOfficerWriteConverter converter;
 
     @BeforeEach
     public void setUp() {
-        converter = new DisqualifiedOfficerWriteConverter(new ObjectMapper());
+        converter = new DisqualifiedCorporateOfficerWriteConverter(new ObjectMapper());
     }
 
     @Test
     public void canConvertDocument() {
-        DisqualificationDocument document = new DisqualificationDocument();
-        document.setId("OFFICER_ID");
+        CorporateDisqualificationApi api = new CorporateDisqualificationApi();
+        api.setCompanyNumber(OFFICER_ID);
 
-        BasicDBObject object = converter.convert(document);
+        BasicDBObject object = converter.convert(api);
 
         String json = object.toJson();
         assertTrue(json.contains(OFFICER_ID));
