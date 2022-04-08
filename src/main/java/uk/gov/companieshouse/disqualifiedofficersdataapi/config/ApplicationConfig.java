@@ -22,17 +22,6 @@ import java.util.List;
 @Configuration
 public class ApplicationConfig {
 
-    @Bean
-    EnvironmentReader environmentReader() {
-        return new EnvironmentReaderImpl();
-    }
-
-    @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public InternalApiClient internalApiClient() {
-        return ApiSdkManager.getPrivateSDK();
-    }
-
     /**
      * mongoCustomConversions.
      *
