@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class InsolvencyApiClientServiceTest {
+public class DisqualifiedOfficerApiClientServiceTest {
 
     @Mock
     private ApiClientService apiClientService;
