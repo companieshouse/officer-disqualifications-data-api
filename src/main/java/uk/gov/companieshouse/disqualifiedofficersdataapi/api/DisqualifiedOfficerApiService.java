@@ -24,7 +24,7 @@ public class DisqualifiedOfficerApiService {
     private final ApiClientService apiClientService;
 
     /**
-     * Invoke Insolvency API.
+     * Invoke API.
      */
     public DisqualifiedOfficerApiService(@Value("${chs.kafka.api.endpoint}") String chsKafkaUrl,
                                 ApiClientService apiClientService, Logger logger) {
