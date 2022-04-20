@@ -5,7 +5,6 @@ import com.mongodb.BasicDBObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
 
 import static org.junit.Assert.assertTrue;
 

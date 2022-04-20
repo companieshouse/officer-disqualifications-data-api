@@ -1,11 +1,17 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.NaturalDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.transform.DisqualificationTransformer;
@@ -29,6 +35,8 @@ public class DisqualifiedOfficerService {
 
     @Autowired
     private DisqualificationTransformer transformer;
+    @Autowired
+    DisqualifiedOfficerApiService disqualifiedOfficerApiService;
 
     private final DateTimeFormatter dateTimeFormatter =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -48,7 +56,7 @@ public class DisqualifiedOfficerService {
 
             DisqualificationDocument document = transformer.transformNaturalDisqualifiedOfficer(officerId, requestBody);
 
-            saveAndCallChsKafka(contextId, officerId, document);
+            saveAndCallChsKafka(contextId, officerId, document, "natural");
         }
     }
 
@@ -67,7 +75,7 @@ public class DisqualifiedOfficerService {
 
             DisqualificationDocument document = transformer.transformCorporateDisqualifiedOfficer(officerId, requestBody);
 
-            saveAndCallChsKafka(contextId, officerId, document);
+            saveAndCallChsKafka(contextId, officerId, document, "corporate");
         }
     }
 
@@ -89,7 +97,9 @@ public class DisqualifiedOfficerService {
      * @param officerId Mongo id
      * @param document  Transformed Data
      */
-    private void saveAndCallChsKafka(String contextId, String officerId, DisqualificationDocument document) {
+    private void saveAndCallChsKafka(String contextId, String officerId,
+            DisqualificationDocument document, String type) {
+        boolean savedToDb = false;
         Created created = getCreatedFromCurrentRecord(officerId);
         if(created == null) {
             document.setCreated(new Created().setAt(document.getUpdated().getAt()));
@@ -97,9 +107,18 @@ public class DisqualifiedOfficerService {
             document.setCreated(created);
         }
 
-        repository.save(document);
-
-        //TODO - call the chs kafka api
+        try {
+            repository.save(document);
+            savedToDb = true;
+        } catch (IllegalArgumentException illegalArgumentEx) {
+            throw new BadRequestException(illegalArgumentEx.getMessage());
+        } catch (DataAccessException dbException) {
+            throw new ServiceUnavailableException(dbException.getMessage());
+        }
+        
+        if (savedToDb) {
+            disqualifiedOfficerApiService.invokeChsKafkaApi(contextId, officerId, type);
+        }
     }
 
     /**

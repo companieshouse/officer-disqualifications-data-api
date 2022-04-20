@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalDisqualificationApiInternalData;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Updated;
@@ -42,6 +43,9 @@ public class DisqualifiedOfficerServiceTest {
     @Mock
     private DisqualificationTransformer transformer;
 
+    @Mock
+    private DisqualifiedOfficerApiService disqualifiedOfficerApiService;
+
     @Captor
     private ArgumentCaptor<String> dateCaptor;
 
@@ -71,13 +75,14 @@ public class DisqualifiedOfficerServiceTest {
 
     @Test
     public void processNaturalDisqualificationSavesDisqualification() {
-        when(repository.findUpdatedDisqualification(eq(OFFICER_ID), dateCaptor.capture())).thenReturn(new ArrayList());
+        when(repository.findUpdatedDisqualification(eq(OFFICER_ID), dateCaptor.capture())).thenReturn(new ArrayList<>());
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.empty());
         when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
 
         service.processNaturalDisqualification("", OFFICER_ID, request);
 
         verify(repository).save(document);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi("", "officerId", "natural");
         assertEquals(dateString, dateCaptor.getValue());
         assertNotNull(document.getCreated().getAt());
     }
@@ -85,13 +90,14 @@ public class DisqualifiedOfficerServiceTest {
     @Test
     public void processNaturalDisqualificationUpdatesDisqualification() {
         document.setCreated(new Created().setAt(LocalDateTime.now()));
-        when(repository.findUpdatedDisqualification(eq(OFFICER_ID), dateCaptor.capture())).thenReturn(new ArrayList());
+        when(repository.findUpdatedDisqualification(eq(OFFICER_ID), dateCaptor.capture())).thenReturn(new ArrayList<>());
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
 
         service.processNaturalDisqualification("", OFFICER_ID, request);
 
         verify(repository).save(document);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi("", "officerId", "natural");
         assertEquals(dateString, dateCaptor.getValue());
         assertNotNull(document.getCreated());
     }
@@ -106,18 +112,20 @@ public class DisqualifiedOfficerServiceTest {
         service.processNaturalDisqualification("", OFFICER_ID, request);
 
         verify(repository, times(0)).save(document);
+        verify(disqualifiedOfficerApiService, times(0)).invokeChsKafkaApi("", "officerId", "natural");
         assertEquals(dateString, dateCaptor.getValue());
     }
 
     @Test
     public void processCorporateDisqualificationSavesDisqualification() {
-        when(repository.findUpdatedDisqualification(eq(OFFICER_ID), dateCaptor.capture())).thenReturn(new ArrayList());
+        when(repository.findUpdatedDisqualification(eq(OFFICER_ID), dateCaptor.capture())).thenReturn(new ArrayList<>());
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.empty());
         when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
 
         service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
 
         verify(repository).save(document);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi("", "officerId", "corporate");
         assertEquals(dateString, dateCaptor.getValue());
         assertNotNull(document.getCreated().getAt());
     }
