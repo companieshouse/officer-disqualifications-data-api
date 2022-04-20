@@ -4,14 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DisqualifiedOfficerService;
 
 import uk.gov.companieshouse.logging.Logger;
@@ -69,5 +68,42 @@ public class DisqualifiedOfficerController {
         service.processCorporateDisqualification(contextId, officerId, requestBody);
 
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Retrieve natural disqualified officer information for a officer ID.
+     *
+     * @param  officerId  the officer ID for the disqualification
+     * @return NaturalDisqualificationDocument return natural disqualified officer information
+     */
+    @GetMapping("/disqualified-officers/natural/{officer_id}")
+    public ResponseEntity<NaturalDisqualificationApi> naturalDisqualification(
+            @PathVariable("officer_id") final String officerId) {
+        logger.info(String.format(
+                "Retrieving natural officer disqualification information for officer ID %s",
+                officerId));
+
+        NaturalDisqualificationDocument disqualification = service.retrieveNaturalDisqualification(officerId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(disqualification.getData());
+    }
+
+    /**
+     * Retrieve corporate disqualified officer information for a officer ID.
+     *
+     * @param  officerId  the officer ID for the disqualification
+     * @return CorporateDisqualificationDocument return corporate disqualified officer information
+     */
+    @GetMapping("/disqualified-officers/corporate/{officer_id}")
+    public ResponseEntity<CorporateDisqualificationApi> corporateDisqualification(
+            @PathVariable("officer_id") String officerId) {
+        logger.info(String.format(
+                "Retrieving corporate officer disqualification information for officer ID %s",
+                officerId));
+
+        CorporateDisqualificationDocument disqualification = service.retrieveCorporateDisqualification(
+                officerId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(disqualification.getData());
     }
 }

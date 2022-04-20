@@ -8,8 +8,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedCorporateOfficerReadConverter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedCorporateOfficerWriteConverter;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedNaturalOfficerReadConverter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedNaturalOfficerWriteConverter;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.serialization.LocalDateDeSerializer;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.serialization.LocalDateSerializer;
 
 import java.time.LocalDate;
@@ -27,7 +30,9 @@ public class ApplicationConfig {
     public MongoCustomConversions mongoCustomConversions() {
         ObjectMapper objectMapper = mongoDbObjectMapper();
         return new MongoCustomConversions(List.of(new DisqualifiedNaturalOfficerWriteConverter(objectMapper),
-                new DisqualifiedCorporateOfficerWriteConverter(objectMapper)));
+                new DisqualifiedCorporateOfficerWriteConverter(objectMapper),
+                new DisqualifiedNaturalOfficerReadConverter(objectMapper),
+                new DisqualifiedCorporateOfficerReadConverter(objectMapper)));
     }
 
     /**
@@ -42,6 +47,7 @@ public class ApplicationConfig {
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         SimpleModule module = new SimpleModule();
         module.addSerializer(LocalDate.class, new LocalDateSerializer());
+        module.addDeserializer(LocalDate.class, new LocalDateDeSerializer());
         objectMapper.registerModule(module);
         return objectMapper;
     }

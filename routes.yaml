@@ -5,3 +5,5 @@ routes:
   1: ^/disqualified-officers/healthcheck
   2: ^/disqualified-officers/natural/(.*)/internal
   3: ^/disqualified-officers/corporate/(.*)/internal
+  4: ^/disqualified-officers/natural/(.*)
+  5: ^/disqualified-officers/corporate/(.*)
