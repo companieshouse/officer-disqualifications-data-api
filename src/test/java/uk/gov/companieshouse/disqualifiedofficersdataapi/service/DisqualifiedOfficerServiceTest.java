@@ -8,14 +8,12 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
-import uk.gov.companieshouse.api.disqualification.InternalDisqualificationApiInternalData;
-import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Updated;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.NaturalDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.transform.DisqualificationTransformer;
 
 import java.time.LocalDateTime;
@@ -27,7 +25,9 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +39,12 @@ public class DisqualifiedOfficerServiceTest {
 
     @Mock
     private DisqualifiedOfficerRepository repository;
+
+    @Mock
+    private NaturalDisqualifiedOfficerRepository naturalRepository;
+
+    @Mock
+    private CorporateDisqualifiedOfficerRepository corporateRepository;
 
     @Mock
     private DisqualificationTransformer transformer;
@@ -129,4 +135,69 @@ public class DisqualifiedOfficerServiceTest {
         assertEquals(dateString, dateCaptor.getValue());
         assertNotNull(document.getCreated().getAt());
     }
+
+    @Test
+    void correctOfficerIdIsGivenReturnsDisqualification() {
+        NaturalDisqualificationDocument naturalDocument = new NaturalDisqualificationDocument();
+        naturalDocument.setData(new NaturalDisqualificationApi());
+        naturalDocument.setId(OFFICER_ID);
+        when(naturalRepository.findById(OFFICER_ID)).thenReturn(Optional.of(naturalDocument));
+
+        NaturalDisqualificationDocument disqualification = service.retrieveNaturalDisqualification(OFFICER_ID);
+
+        assertNotNull(disqualification);
+        verify(naturalRepository, times(1)).findById(any());
+    }
+
+    @Test
+    void correctOfficerIdIsGivenReturnsCorporateDisqualification() {
+        CorporateDisqualificationDocument corporateDocument = new CorporateDisqualificationDocument();
+        corporateDocument.setData(new CorporateDisqualificationApi());
+        corporateDocument.setCorporateOfficer(true);
+        corporateDocument.setId(OFFICER_ID);
+        when(corporateRepository.findById(OFFICER_ID)).thenReturn(Optional.of(corporateDocument));
+
+        CorporateDisqualificationDocument disqualification = service.retrieveCorporateDisqualification(OFFICER_ID);
+
+        assertNotNull(disqualification);
+        verify(corporateRepository, times(1)).findById(any());
+    }
+
+    @Test
+    void throwsExceptionWhenCorporateIndIsTrueButNaturalOfficerCalled() {
+        NaturalDisqualificationDocument naturalDocument = new NaturalDisqualificationDocument();
+        naturalDocument.setData(new NaturalDisqualificationApi());
+        naturalDocument.setCorporateOfficer(true);
+        naturalDocument.setId(OFFICER_ID);
+        when(naturalRepository.findById(OFFICER_ID)).thenReturn(Optional.of(naturalDocument));
+
+        assertThrows(RuntimeException.class, () -> service.retrieveNaturalDisqualification
+                (OFFICER_ID));
+        verify(naturalRepository, times(1)).findById(any());
+
+    }
+
+    @Test
+    void throwsExceptionWhenCorporateIndIsFalseButCorporateOfficerCalled() {
+        CorporateDisqualificationDocument corporateDocument = new CorporateDisqualificationDocument();
+        corporateDocument.setData(new CorporateDisqualificationApi());
+        corporateDocument.setCorporateOfficer(false);
+        corporateDocument.setId(OFFICER_ID);
+        when(corporateRepository.findById(OFFICER_ID)).thenReturn(Optional.of(corporateDocument));
+
+        assertThrows(RuntimeException.class, () -> service.retrieveCorporateDisqualification
+                (OFFICER_ID));
+        verify(corporateRepository, times(1)).findById(any());
+
+    }
+
+    @Test
+    void throwsExceptionWhenInvalidIdGiven() {
+
+        assertThrows(RuntimeException.class, () -> service.retrieveNaturalDisqualification
+                ("asdfasdfasdf"));
+        verify(naturalRepository, times(1)).findById(any());
+
+    }
+
 }
