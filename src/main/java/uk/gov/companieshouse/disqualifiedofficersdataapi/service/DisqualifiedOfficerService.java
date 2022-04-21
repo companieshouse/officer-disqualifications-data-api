@@ -5,12 +5,15 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.NaturalDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.transform.DisqualificationTransformer;
 
 import java.time.OffsetDateTime;
@@ -23,6 +26,13 @@ public class DisqualifiedOfficerService {
 
     @Autowired
     private DisqualifiedOfficerRepository repository;
+
+    @Autowired
+    private NaturalDisqualifiedOfficerRepository naturalRepository;
+
+    @Autowired
+    private CorporateDisqualifiedOfficerRepository corporateRepository;
+
     @Autowired
     private DisqualificationTransformer transformer;
     @Autowired
@@ -120,6 +130,32 @@ public class DisqualifiedOfficerService {
         Optional<DisqualificationDocument> doc = repository.findById(officerId);
 
         return doc.isPresent() ? doc.get().getCreated(): null;
+    }
+
+    public NaturalDisqualificationDocument retrieveNaturalDisqualification(String officerId) {
+        Optional<NaturalDisqualificationDocument> disqualificationDocumentOptional =
+                naturalRepository.findById(officerId);
+        NaturalDisqualificationDocument disqualificationDocument = disqualificationDocumentOptional.orElseThrow(
+                () -> new IllegalArgumentException(String.format(
+                        "Resource not found for officer ID: %s", officerId)));
+        if(disqualificationDocument.isCorporateOfficer()) {
+            throw new IllegalArgumentException(String.format(
+                    "Natural resource not found for officer ID: %s", officerId));
+        }
+        return disqualificationDocument;
+    }
+
+    public CorporateDisqualificationDocument retrieveCorporateDisqualification(String officerId) {
+        Optional<CorporateDisqualificationDocument> disqualificationDocumentOptional =
+                corporateRepository.findById(officerId);
+        CorporateDisqualificationDocument disqualificationDocument = disqualificationDocumentOptional.orElseThrow(
+                () -> new IllegalArgumentException(String.format(
+                        "Resource not found for officer ID: %s", officerId)));
+        if(!disqualificationDocument.isCorporateOfficer()) {
+            throw new IllegalArgumentException(String.format(
+                    "Corporate resource not found for officer ID: %s", officerId));
+        }
+        return disqualificationDocument;
     }
 
 }
