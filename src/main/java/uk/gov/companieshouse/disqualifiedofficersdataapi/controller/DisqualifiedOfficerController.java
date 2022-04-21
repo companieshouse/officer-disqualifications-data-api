@@ -86,8 +86,10 @@ public class DisqualifiedOfficerController {
 
         NaturalDisqualificationDocument disqualification = service.retrieveNaturalDisqualification(officerId);
         NaturalDisqualificationApi data = disqualification.getData();
-        for (PermissionToAct permissionToAct : data.getPermissionsToAct()) {
-            permissionToAct.setPurpose(null);
+        if (data.getPermissionsToAct() != null) {
+            for (PermissionToAct permissionToAct : data.getPermissionsToAct()) {
+                permissionToAct.setPurpose(null);
+            }
         }
         data.setPersonNumber(null);
 
@@ -110,8 +112,10 @@ public class DisqualifiedOfficerController {
         CorporateDisqualificationDocument disqualification = service.retrieveCorporateDisqualification(
                 officerId);
         CorporateDisqualificationApi data = disqualification.getData();
-        for (PermissionToAct permissionToAct : data.getPermissionsToAct()) {
-            permissionToAct.setPurpose(null);
+        if (data.getPermissionsToAct() != null) {
+            for (PermissionToAct permissionToAct : data.getPermissionsToAct()) {
+                permissionToAct.setPurpose(null);
+            }
         }
         data.setPersonNumber(null);
 
