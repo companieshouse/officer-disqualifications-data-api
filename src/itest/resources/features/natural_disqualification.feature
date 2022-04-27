@@ -20,5 +20,5 @@ Feature: Process natural disqualified officer information
     And the natural Get call response body should match "<result>" file
 
     Examples:
-      | offiderId     | result                                    |
+      | officerId     | result                                    |
       | 1234567890    | retrieve_natural_disqualified_officer     |
