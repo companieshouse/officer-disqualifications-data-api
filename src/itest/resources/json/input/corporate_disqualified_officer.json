@@ -1,0 +1,49 @@
+{
+  "external_data" : {
+    "etag" : "",
+    "company_number": "00053723",
+    "surname": "BABYLON INCORPORATION LIMITED",
+    "honours": "",
+    "registered_location": "SCOTLAND",
+    "disqualifications" : [
+      {
+        "address": {
+          "premise": "30",
+          "address_line_1": "Lucy Road",
+          "address_line_2": "Skewen",
+          "locality": "Neath",
+          "region": "",
+          "country": "Wales",
+          "postal_code": "SA10 6RR"
+        },
+        "case_identifier" : "INV3975227",
+        "company_names": [
+          "CONSORTIUM TECHNOLOGY LIMITED"
+        ],
+        "court_name" : "Insolvency Service",
+        "disqualification_type" : "COURTORDER",
+        "disqualified_from" : "2022-04-05T12:51:00.767Z",
+        "disqualified_until" : "2025-04-05T12:51:00.767Z",
+        "heard_on" : "2022-04-05T12:51:00.767Z",
+        "undertaken_on" : "2022-04-05T12:51:00.767Z",
+        "reason" : {
+          "act": "company-directors-disqualification-act-1986",
+          "section": "7",
+          "description_identifier": "order-or-undertaking-and-reporting-provisions",
+          "article" : "string"
+        }
+      }
+    ],
+    "links" : {
+      "self": "/disqualified-officers/corporate/3vMsWfl5MusTRDMK2o-lDlUEnzU"
+    }
+  },
+  "internal_data" : {
+    "delta_at" : "2022-04-05T15:51:00.768Z",
+    "officer_id" : "1234567891",
+    "officer_id_raw" : "1234567891",
+    "officer_disq_id" : "1234567891",
+    "officer_detail_id" : "1234567891",
+    "corporate_indicator": "true"
+  }
+}
