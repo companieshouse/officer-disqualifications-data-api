@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.steps;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -115,6 +116,11 @@ public class CorporateDisqualificationSteps {
 
         assertThat(expected.getName()).isEqualTo(actual.getName());
         assertThat(expected.getDisqualifications()).isEqualTo(actual.getDisqualifications());
+    }
+
+    @After
+    public void dbStop(){
+        mongoDBContainer.stop();
     }
 
 }

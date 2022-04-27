@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -112,6 +113,11 @@ public class NaturalDisqualificationSteps {
 
         assertThat(expected.getSurname()).isEqualTo(actual.getSurname());
         assertThat(expected.getDisqualifications()).isEqualTo(actual.getDisqualifications());
+    }
+
+    @After
+    public void dbStop(){
+        mongoDBContainer.stop();
     }
 
 }
