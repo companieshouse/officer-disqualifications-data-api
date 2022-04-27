@@ -1,0 +1,57 @@
+{
+  "company_number": "00053723",
+  "person_number": null,
+  "country_of_registration": "SCOTLAND",
+  "etag": "c203d90c7e2276b0a8a9faeb5700f8dc3e9a18e2",
+  "kind": null,
+  "name": "BABYLON INCORPORATION LIMITED",
+  "links": {
+    "self": "/disqualified-officers/corporate/3vMsWfl5MusTRDMK2o-lDlUEnzU"
+  },
+  "disqualifications": [
+    {
+      "case_identifier": "INV3975227",
+      "address": {
+        "premise": "30",
+        "address_line_1": "Lucy Road",
+        "address_line_2": "Skewen",
+        "locality": "Neath",
+        "region": "",
+        "country": "Wales",
+        "postal_code": "SA10 6RR"
+      },
+      "company_names": [
+        "CONSORTIUM TECHNOLOGY LIMITED"
+      ],
+      "court_name": "Insolvency Service",
+      "disqualification_type": "court-order",
+      "disqualified_from": "2022-04-05",
+      "disqualified_until": "2025-04-05",
+      "heard_on": "2022-04-05",
+      "undertaken_on": null,
+      "last_variation": {
+        "varied_on": "2022-04-05",
+        "case_identifier": "1",
+        "court_name": "Judys"
+      },
+      "reason": {
+        "act": "company-directors-disqualification-act-1986",
+        "section": "7",
+        "description_identifier": "order-or-undertaking-and-reporting-provisions",
+        "article": "string"
+      }
+    }
+  ],
+  "permissions_to_act": [
+    {
+      "company_names": [
+        "123 LTD",
+        "321 LTD"
+      ],
+      "court_name": "rinder",
+      "expires_on": "2022-04-05",
+      "granted_on": "2022-04-05",
+      "purpose": null
+    }
+  ]
+}
