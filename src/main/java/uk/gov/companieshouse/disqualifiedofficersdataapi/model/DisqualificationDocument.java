@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.model;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.persistence.Id;
 
@@ -10,10 +11,13 @@ public class DisqualificationDocument {
     @Id
     private String id;
 
+    @Field("officer_disq_id")
     private String officerDisqId;
 
+    @Field("officer_detail_id")
     private String officerDetailId;
 
+    @Field("officer_id_raw")
     private String officerIdRaw;
 
     private Created created;
