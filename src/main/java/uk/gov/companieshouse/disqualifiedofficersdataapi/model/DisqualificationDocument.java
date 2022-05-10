@@ -22,8 +22,10 @@ public class DisqualificationDocument {
 
     private Created created;
 
+    @Field("delta_at")
     private String deltaAt;
 
+    @Field("is_corporate_officer")
     private boolean isCorporateOfficer;
 
     private Updated updated;
