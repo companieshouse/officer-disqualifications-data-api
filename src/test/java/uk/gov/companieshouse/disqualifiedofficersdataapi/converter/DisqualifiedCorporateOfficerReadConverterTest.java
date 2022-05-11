@@ -5,7 +5,6 @@ import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
-import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 
 import static org.junit.Assert.assertEquals;
 

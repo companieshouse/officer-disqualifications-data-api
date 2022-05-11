@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.BasicDBObject;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
