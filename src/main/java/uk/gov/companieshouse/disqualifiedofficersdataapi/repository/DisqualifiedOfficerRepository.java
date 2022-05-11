@@ -11,5 +11,5 @@ import java.util.List;
 public interface DisqualifiedOfficerRepository extends MongoRepository<DisqualificationDocument, String> {
 
     @Query("{'_id': ?0, 'updated.at':{$gte : { \"$date\" : \"?1\" } }}")
-    List findUpdatedDisqualification(String officerId, String at);
+    List<DisqualificationDocument> findUpdatedDisqualification(String officerId, String at);
 }

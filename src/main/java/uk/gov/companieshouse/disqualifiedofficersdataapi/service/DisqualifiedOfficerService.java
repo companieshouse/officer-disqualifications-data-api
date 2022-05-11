@@ -87,7 +87,8 @@ public class DisqualifiedOfficerService {
      */
     private boolean isLatestRecord(String officerId, OffsetDateTime deltaAt) {
         String formattedDate = deltaAt.format(dateTimeFormatter);
-        List disqualifications = repository.findUpdatedDisqualification(officerId, formattedDate);
+        List<DisqualificationDocument> disqualifications = repository
+                .findUpdatedDisqualification(officerId, formattedDate);
         return disqualifications.isEmpty();
     }
 

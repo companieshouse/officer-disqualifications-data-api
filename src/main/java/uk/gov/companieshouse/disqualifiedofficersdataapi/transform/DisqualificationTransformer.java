@@ -2,7 +2,6 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.transform;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.GenerateEtagUtil;
-import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalDisqualificationApiInternalData;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
