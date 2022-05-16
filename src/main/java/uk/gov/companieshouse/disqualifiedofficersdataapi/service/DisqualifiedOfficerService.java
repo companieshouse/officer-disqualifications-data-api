@@ -56,7 +56,7 @@ public class DisqualifiedOfficerService {
 
             DisqualificationDocument document = transformer.transformNaturalDisqualifiedOfficer(officerId, requestBody);
 
-            saveAndCallChsKafka(contextId, officerId, document, "natural");
+            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL);
         }
     }
 
@@ -75,7 +75,7 @@ public class DisqualifiedOfficerService {
 
             DisqualificationDocument document = transformer.transformCorporateDisqualifiedOfficer(officerId, requestBody);
 
-            saveAndCallChsKafka(contextId, officerId, document, "corporate");
+            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE);
         }
     }
 
@@ -99,7 +99,7 @@ public class DisqualifiedOfficerService {
      * @param document  Transformed Data
      */
     private void saveAndCallChsKafka(String contextId, String officerId,
-            DisqualificationDocument document, String type) {
+            DisqualificationDocument document, DisqualificationResourceType type) {
         boolean savedToDb = false;
         Created created = getCreatedFromCurrentRecord(officerId);
         if(created == null) {

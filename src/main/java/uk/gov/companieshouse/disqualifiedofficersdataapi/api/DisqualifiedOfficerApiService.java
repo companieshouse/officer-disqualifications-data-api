@@ -1,7 +1,8 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
-import java.time.OffsetDateTime;
+import java.util.function.Supplier;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResource
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.logging.Logger;
 
 @Service
@@ -22,15 +24,17 @@ public class DisqualifiedOfficerApiService {
     private final Logger logger;
     private final String chsKafkaUrl;
     private final ApiClientService apiClientService;
+    private final Supplier<String> timestampGenerator;
 
     /**
      * Invoke API.
      */
     public DisqualifiedOfficerApiService(@Value("${chs.kafka.api.endpoint}") String chsKafkaUrl,
-                                ApiClientService apiClientService, Logger logger) {
+                                ApiClientService apiClientService, Logger logger, Supplier<String> timestampGenerator) {
         this.chsKafkaUrl = chsKafkaUrl;
         this.apiClientService = apiClientService;
         this.logger = logger;
+        this.timestampGenerator = timestampGenerator;
     }
 
     /**
@@ -40,7 +44,7 @@ public class DisqualifiedOfficerApiService {
      * @param type the type of officer, corporate or natural disqualified
      * @return the respons from the kafka api
      */
-    public ApiResponse<Void> invokeChsKafkaApi(String contextId, String officerId, String type) {
+    public ApiResponse<Void> invokeChsKafkaApi(String contextId, String officerId, DisqualificationResourceType type) {
         InternalApiClient internalApiClient = apiClientService.getInternalApiClient();
         internalApiClient.setBasePath(chsKafkaUrl);
 
@@ -65,17 +69,16 @@ public class DisqualifiedOfficerApiService {
         }
     }
 
-    private ChangedResource mapChangedResource(String contextId, String officerId, String officerType) {
-        String resourceUri = "/disqualified-officers/" + officerType + "/" + officerId;
+    private ChangedResource mapChangedResource(String contextId, String officerId, DisqualificationResourceType officerType) {
+        String resourceUri = "/disqualified-officers/" + officerType.getPathIdentification() + "/" + officerId;
 
         ChangedResourceEvent event = new ChangedResourceEvent();
         event.setType("changed");
-        event.publishedAt(String.valueOf(OffsetDateTime.now()));
-
+        event.publishedAt(this.timestampGenerator.get());
         ChangedResource changedResource = new ChangedResource();
         changedResource.setResourceUri(resourceUri);
         changedResource.event(event);
-        changedResource.setResourceKind("disqualified-officers");
+        changedResource.setResourceKind(officerType.getResourceKindIdentification());
         changedResource.setContextId(contextId);
 
         return changedResource;

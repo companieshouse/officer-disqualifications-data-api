@@ -16,7 +16,9 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.serialization.LocalDate
 import uk.gov.companieshouse.disqualifiedofficersdataapi.serialization.LocalDateSerializer;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Configuration
 public class ApplicationConfig {
@@ -33,6 +35,11 @@ public class ApplicationConfig {
                 new DisqualifiedCorporateOfficerWriteConverter(objectMapper),
                 new DisqualifiedNaturalOfficerReadConverter(objectMapper),
                 new DisqualifiedCorporateOfficerReadConverter(objectMapper)));
+    }
+
+    @Bean
+    public Supplier<String> offsetDateTimeGenerator() {
+        return () -> String.valueOf(OffsetDateTime.now());
     }
 
     /**
