@@ -2,6 +2,7 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
+import java.util.function.Function;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -14,14 +15,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.logging.Logger;
 
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
@@ -47,26 +51,37 @@ public class DisqualifiedOfficerApiClientServiceTest {
     @Mock
     private Logger logger;
 
+    @Mock
+    private Supplier<String> dateGenerator;
+
+    @Mock
+    private Function<ResourceChangedRequest, ChangedResource> mapper;
+
+    @Mock
+    private ResourceChangedRequest resourceChangedRequest;
+
+    @Mock
+    private ChangedResource changedResource;
+
     @InjectMocks
     private DisqualifiedOfficerApiService disqualifiedOfficerApiService;
 
     @Test
     void should_invoke_chs_kafka_endpoint_successfully() throws ApiErrorResponseException {
-
         when(apiClientService.getInternalApiClient()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(changedResourcePost);
         when(changedResourcePost.execute()).thenReturn(response);
+        when(mapper.apply(resourceChangedRequest)).thenReturn(changedResource);
 
-        ApiResponse<?> apiResponse = disqualifiedOfficerApiService.invokeChsKafkaApi("35234234",
-                "CH4000056", "natural");
+        ApiResponse<?> apiResponse =
+                disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest);
 
         Assertions.assertThat(apiResponse).isNotNull();
 
         verify(apiClientService, times(1)).getInternalApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(),
-                Mockito.any());
+        verify(privateChangedResourceHandler, times(1)).postChangedResource("/resource-changed", changedResource);
         verify(changedResourcePost, times(1)).execute();
     }
 
@@ -80,7 +95,8 @@ public class DisqualifiedOfficerApiClientServiceTest {
 
 
         Assert.assertThrows(RuntimeException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi
-                ("3245435", "CH4000056", "natural"));
+                (new ResourceChangedRequest("3245435", "CH4000056",
+                        DisqualificationResourceType.NATURAL)));
 
         verify(apiClientService, times(1)).getInternalApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
@@ -95,6 +111,7 @@ public class DisqualifiedOfficerApiClientServiceTest {
         when(apiClientService.getInternalApiClient()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(changedResourcePost);
+        when(mapper.apply(resourceChangedRequest)).thenReturn(changedResource);
 
         HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCode,
                 statusMessage, new HttpHeaders());
@@ -102,14 +119,12 @@ public class DisqualifiedOfficerApiClientServiceTest {
                 new ApiErrorResponseException(builder);
         when(changedResourcePost.execute()).thenThrow(apiErrorResponseException);
 
-        Assert.assertThrows(exception,
-                () -> disqualifiedOfficerApiService.invokeChsKafkaApi
-                        ("3245435", "CH4000056", "natural"));
+        Assert.assertThrows(exception, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
 
         verify(apiClientService, times(1)).getInternalApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(),
-                Mockito.any());
+        verify(privateChangedResourceHandler, times(1)).postChangedResource("/resource-changed",
+                changedResource);
         verify(changedResourcePost, times(1)).execute();
     }
 

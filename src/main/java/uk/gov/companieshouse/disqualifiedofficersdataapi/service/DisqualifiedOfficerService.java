@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
@@ -54,7 +55,7 @@ public class DisqualifiedOfficerService {
 
             DisqualificationDocument document = transformer.transformNaturalDisqualifiedOfficer(officerId, requestBody);
 
-            saveAndCallChsKafka(contextId, officerId, document, "natural");
+            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL);
         }
     }
 
@@ -73,7 +74,7 @@ public class DisqualifiedOfficerService {
 
             DisqualificationDocument document = transformer.transformCorporateDisqualifiedOfficer(officerId, requestBody);
 
-            saveAndCallChsKafka(contextId, officerId, document, "corporate");
+            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE);
         }
     }
 
@@ -97,7 +98,7 @@ public class DisqualifiedOfficerService {
      * @param document  Transformed Data
      */
     private void saveAndCallChsKafka(String contextId, String officerId,
-            DisqualificationDocument document, String type) {
+            DisqualificationDocument document, DisqualificationResourceType type) {
         boolean savedToDb = false;
         Created created = getCreatedFromCurrentRecord(officerId);
         if(created == null) {
@@ -114,7 +115,7 @@ public class DisqualifiedOfficerService {
         }
         
         if (savedToDb) {
-            disqualifiedOfficerApiService.invokeChsKafkaApi(contextId, officerId, type);
+            disqualifiedOfficerApiService.invokeChsKafkaApi(new ResourceChangedRequest(contextId, officerId, type));
         }
     }
 
