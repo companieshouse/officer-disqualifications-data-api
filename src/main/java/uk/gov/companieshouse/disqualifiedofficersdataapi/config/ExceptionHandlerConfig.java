@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -93,7 +94,7 @@ public class ExceptionHandlerConfig {
      * @param request request.
      * @return error response to return.
      */
-    @ExceptionHandler(value = {ServiceUnavailableException.class})
+    @ExceptionHandler(value = {ServiceUnavailableException.class, DataAccessException.class})
     public ResponseEntity<Object> handleServiceUnavailableException(Exception ex,
                                                                     WebRequest request) {
         logger.error(String.format("Service unavailable, response code: %s",
