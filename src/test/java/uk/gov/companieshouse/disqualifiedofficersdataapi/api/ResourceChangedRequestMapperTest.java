@@ -1,11 +1,15 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
@@ -24,6 +28,9 @@ public class ResourceChangedRequestMapperTest {
     @Mock
     private Supplier<String> timestampGenerator;
 
+    @Mock
+    private ResourceChangedRequest request;
+
     @InjectMocks
     private ResourceChangedRequestMapper mapper;
 
@@ -38,6 +45,16 @@ public class ResourceChangedRequestMapperTest {
 
         // then
         assertEquals(argument.getChangedResource(), actual);
+    }
+
+    @Test
+    void testMapperThrowsIllegalStateExceptionIfResourceTypeNull() {
+        // when
+        Executable executable = () -> mapper.mapChangedResource(request);
+
+        // then
+        IllegalStateException expectedException = assertThrows(IllegalStateException.class, executable);
+        assertEquals("Unknown disqualification type", expectedException.getMessage());
     }
 
     static Stream<ResourceChangedTestArgument> resourceChangedScenarios() {
