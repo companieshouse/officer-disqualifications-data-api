@@ -5,9 +5,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.util.function.Function;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
+import uk.gov.companieshouse.api.chskafka.ChangedResource;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedCorporateOfficerReadConverter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedCorporateOfficerWriteConverter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedNaturalOfficerReadConverter;
@@ -40,6 +44,12 @@ public class ApplicationConfig {
     @Bean
     public Supplier<String> offsetDateTimeGenerator() {
         return () -> String.valueOf(OffsetDateTime.now());
+    }
+
+    @Bean
+    public Function<ResourceChangedRequest, ChangedResource> mapper() {
+        ResourceChangedRequestMapper mapper = new ResourceChangedRequestMapper(offsetDateTimeGenerator());
+        return mapper::mapChangedResource;
     }
 
     /**

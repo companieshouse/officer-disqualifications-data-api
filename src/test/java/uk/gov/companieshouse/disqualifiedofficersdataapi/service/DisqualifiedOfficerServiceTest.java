@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.disqualification.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
@@ -88,7 +89,8 @@ public class DisqualifiedOfficerServiceTest {
         service.processNaturalDisqualification("", OFFICER_ID, request);
 
         verify(repository).save(document);
-        verify(disqualifiedOfficerApiService).invokeChsKafkaApi("", "officerId", DisqualificationResourceType.NATURAL);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+                DisqualificationResourceType.NATURAL));
         assertEquals(dateString, dateCaptor.getValue());
         assertNotNull(document.getCreated().getAt());
     }
@@ -103,7 +105,8 @@ public class DisqualifiedOfficerServiceTest {
         service.processNaturalDisqualification("", OFFICER_ID, request);
 
         verify(repository).save(document);
-        verify(disqualifiedOfficerApiService).invokeChsKafkaApi("", "officerId", DisqualificationResourceType.NATURAL);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+                DisqualificationResourceType.NATURAL));
         assertEquals(dateString, dateCaptor.getValue());
         assertNotNull(document.getCreated());
     }
@@ -118,7 +121,8 @@ public class DisqualifiedOfficerServiceTest {
         service.processNaturalDisqualification("", OFFICER_ID, request);
 
         verify(repository, times(0)).save(document);
-        verify(disqualifiedOfficerApiService, times(0)).invokeChsKafkaApi("", "officerId", DisqualificationResourceType.NATURAL);
+        verify(disqualifiedOfficerApiService, times(0)).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+                DisqualificationResourceType.NATURAL));
         assertEquals(dateString, dateCaptor.getValue());
     }
 
@@ -131,7 +135,8 @@ public class DisqualifiedOfficerServiceTest {
         service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
 
         verify(repository).save(document);
-        verify(disqualifiedOfficerApiService).invokeChsKafkaApi("", "officerId", DisqualificationResourceType.CORPORATE);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+                DisqualificationResourceType.CORPORATE));
         assertEquals(dateString, dateCaptor.getValue());
         assertNotNull(document.getCreated().getAt());
     }

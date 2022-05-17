@@ -1,20 +1,18 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
-import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.logging.Logger;
 
 @Service
@@ -24,33 +22,34 @@ public class DisqualifiedOfficerApiService {
     private final Logger logger;
     private final String chsKafkaUrl;
     private final ApiClientService apiClientService;
-    private final Supplier<String> timestampGenerator;
+    private final Function<ResourceChangedRequest, ChangedResource> mapper;
 
     /**
      * Invoke API.
      */
     public DisqualifiedOfficerApiService(@Value("${chs.kafka.api.endpoint}") String chsKafkaUrl,
-                                ApiClientService apiClientService, Logger logger, Supplier<String> timestampGenerator) {
+            ApiClientService apiClientService,
+            Logger logger,
+            Supplier<String> timestampGenerator,
+            Function<ResourceChangedRequest, ChangedResource> mapper) {
         this.chsKafkaUrl = chsKafkaUrl;
         this.apiClientService = apiClientService;
         this.logger = logger;
-        this.timestampGenerator = timestampGenerator;
+        this.mapper = mapper;
     }
 
     /**
      * Calls the CHS Kafka api.
-     * @param contextId the kafka context id
-     * @param officerId the officer id for the record in question
-     * @param type the type of officer, corporate or natural disqualified
-     * @return the respons from the kafka api
+     * @param resourceChangedRequest encapsulates details relating to the updated officer
+     * @return the response from the kafka api
      */
-    public ApiResponse<Void> invokeChsKafkaApi(String contextId, String officerId, DisqualificationResourceType type) {
+    public ApiResponse<Void>  invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
         InternalApiClient internalApiClient = apiClientService.getInternalApiClient();
         internalApiClient.setBasePath(chsKafkaUrl);
 
         PrivateChangedResourcePost changedResourcePost =
                 internalApiClient.privateChangedResourceHandler().postChangedResource(
-                        CHANGED_RESOURCE_URI, mapChangedResource(contextId, officerId, type));
+                        CHANGED_RESOURCE_URI, mapper.apply(resourceChangedRequest));
 
         try {
             return changedResourcePost.execute();
@@ -68,20 +67,4 @@ public class DisqualifiedOfficerApiService {
             }
         }
     }
-
-    private ChangedResource mapChangedResource(String contextId, String officerId, DisqualificationResourceType officerType) {
-        String resourceUri = "/disqualified-officers/" + officerType.getPathIdentification() + "/" + officerId;
-
-        ChangedResourceEvent event = new ChangedResourceEvent();
-        event.setType("changed");
-        event.publishedAt(this.timestampGenerator.get());
-        ChangedResource changedResource = new ChangedResource();
-        changedResource.setResourceUri(resourceUri);
-        changedResource.event(event);
-        changedResource.setResourceKind(officerType.getResourceKindIdentification());
-        changedResource.setContextId(contextId);
-
-        return changedResource;
-    }
-
 }

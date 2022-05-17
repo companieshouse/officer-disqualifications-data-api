@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
@@ -114,7 +115,7 @@ public class DisqualifiedOfficerService {
         }
         
         if (savedToDb) {
-            disqualifiedOfficerApiService.invokeChsKafkaApi(contextId, officerId, type);
+            disqualifiedOfficerApiService.invokeChsKafkaApi(new ResourceChangedRequest(contextId, officerId, type));
         }
     }
 

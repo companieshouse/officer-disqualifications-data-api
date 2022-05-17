@@ -17,6 +17,7 @@ import org.springframework.http.*;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.CucumberContext;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
@@ -93,10 +94,12 @@ public class NaturalDisqualificationSteps {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
         this.contextId = "5234234234";
+        CucumberContext.CONTEXT.set("contextId", this.contextId);
         headers.set("x-request-id", this.contextId);
 
         HttpEntity request = new HttpEntity(data, headers);
         String uri = "/disqualified-officers/natural/{officerId}/internal";
+        CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.NATURAL);
         String officerId = "1234567890";
         ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, officerId);
 
