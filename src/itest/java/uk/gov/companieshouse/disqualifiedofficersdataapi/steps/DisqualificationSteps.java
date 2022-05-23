@@ -3,6 +3,7 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.steps;
 import java.io.IOException;
 import java.util.List;
 
+import com.github.dockerjava.api.exception.InternalServerErrorException;
 import io.cucumber.java.en.*;
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.CucumberContext;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.InternalServerErrorException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
