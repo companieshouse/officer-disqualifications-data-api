@@ -19,7 +19,7 @@ public class DisqualifiedOfficerApiServiceAspect {
         this.logger = logger;
     }
 
-    @Around("execution(public ApiResponse<Void> uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService.invokeChsKafkaApi(..))")
+    @Around("execution(public uk.gov.companieshouse.api.model.ApiResponse<Void> uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService.invokeChsKafkaApi(..))")
     Object invokeChsKafkaApi(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         if (featureFlags.isStreamHookEnabled()) {
             logger.debug("Stream hook enabled; publishing change to chs-kafka-api");
