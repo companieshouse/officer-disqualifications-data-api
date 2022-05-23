@@ -9,10 +9,10 @@ Feature: Respone codes scenarios for disqualification officer
     And nothing is persisted in the database
 
     Examples:
-        | data                                             | response_code |
-        | bad_request_natural                              | 400           |
+        | data                | response_code |
+        | bad_request_natural | 400           |
 
-  Scenario: Processing disqualified officers information unsuccessfully
+  Scenario: Processing disqualified officers information unsuccessfully after internal server error
 
     Given disqualified officers data api service is running
     When the api throws an internal server error
