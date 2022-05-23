@@ -43,7 +43,7 @@ public class DisqualifiedOfficerApiService {
      * @param resourceChangedRequest encapsulates details relating to the updated officer
      * @return the response from the kafka api
      */
-    public ApiResponse<Void>  invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
+    public ApiResponse<Void> invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
         InternalApiClient internalApiClient = apiClientService.getInternalApiClient();
         internalApiClient.setBasePath(chsKafkaUrl);
 

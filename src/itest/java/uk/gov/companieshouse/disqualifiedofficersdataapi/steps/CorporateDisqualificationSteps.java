@@ -109,7 +109,6 @@ public class CorporateDisqualificationSteps {
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
     }
 
-
     @Then("the corporate Get call response body should match {string} file")
     public void the_corporate_get_call_response_body_should_match(String dataFile) throws IOException {
        File file = new ClassPathResource("/json/output/" + dataFile + ".json").getFile();
