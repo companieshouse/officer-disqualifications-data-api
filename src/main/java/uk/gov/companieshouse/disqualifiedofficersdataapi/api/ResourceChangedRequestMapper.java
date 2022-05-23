@@ -1,9 +1,13 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
 import java.util.function.Supplier;
+
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
+
 
 public class ResourceChangedRequestMapper {
 
@@ -28,6 +32,39 @@ public class ResourceChangedRequestMapper {
 
         ChangedResourceEvent event = new ChangedResourceEvent();
         event.setType("changed");
+        event.publishedAt(this.timestampGenerator.get());
+
+        changedResource.event(event);
+        changedResource.setContextId(request.getContextId());
+
+        return changedResource;
+    }
+
+    public ChangedResource mapChangedResource(ResourceChangedRequest request, CorporateDisqualificationDocument document) {
+        ChangedResource changedResource = new ChangedResource();
+
+        changedResource.setResourceUri("/disqualified-officers/corporate/" + request.getOfficerId());
+        changedResource.setResourceKind("disqualified-officer-corporate");
+
+        ChangedResourceEvent event = new ChangedResourceEvent();
+        event.setType("deleted");
+        changedResource.setDeletedData(document.getData());
+        event.publishedAt(this.timestampGenerator.get());
+
+        changedResource.event(event);
+        changedResource.setContextId(request.getContextId());
+
+        return changedResource;
+    }
+
+    public ChangedResource mapChangedResource(ResourceChangedRequest request, NaturalDisqualificationDocument document) {
+        ChangedResource changedResource = new ChangedResource();
+        changedResource.setResourceUri("/disqualified-officers/natural/" + request.getOfficerId());
+        changedResource.setResourceKind("disqualified-officer-natural");
+
+        ChangedResourceEvent event = new ChangedResourceEvent();
+        event.setType("deleted");
+        changedResource.setDeletedData(document.getData());
         event.publishedAt(this.timestampGenerator.get());
 
         changedResource.event(event);

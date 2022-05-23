@@ -2,6 +2,8 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
+
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -16,12 +18,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
+import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -58,6 +62,9 @@ public class DisqualifiedOfficerApiClientServiceTest {
     private Function<ResourceChangedRequest, ChangedResource> mapper;
 
     @Mock
+    private BiFunction<ResourceChangedRequest, CorporateDisqualificationDocument, ChangedResource> corpDeleteMapper;
+
+    @Mock
     private ResourceChangedRequest resourceChangedRequest;
 
     @Mock
@@ -76,6 +83,27 @@ public class DisqualifiedOfficerApiClientServiceTest {
 
         ApiResponse<?> apiResponse =
                 disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest);
+
+        Assertions.assertThat(apiResponse).isNotNull();
+
+        verify(apiClientService, times(1)).getInternalApiClient();
+        verify(internalApiClient, times(1)).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler, times(1)).postChangedResource("/resource-changed", changedResource);
+        verify(changedResourcePost, times(1)).execute();
+    }
+
+    @Test
+    void corp_delete_should_invoke_chs_kafka_endpoint_successfully() throws ApiErrorResponseException {
+        CorporateDisqualificationDocument document = new CorporateDisqualificationDocument();
+        document.setData(new CorporateDisqualificationApi());
+        when(apiClientService.getInternalApiClient()).thenReturn(internalApiClient);
+        when(corpDeleteMapper.apply(resourceChangedRequest, document)).thenReturn(changedResource);
+        when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
+        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(changedResourcePost);
+        when(changedResourcePost.execute()).thenReturn(response);
+
+        ApiResponse<?> apiResponse =
+                disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest, document);
 
         Assertions.assertThat(apiResponse).isNotNull();
 

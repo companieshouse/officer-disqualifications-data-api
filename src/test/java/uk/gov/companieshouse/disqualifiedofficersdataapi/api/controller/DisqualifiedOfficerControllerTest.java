@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,7 +42,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class DisqualifiedOfficerControllerTest {
     private static final String OFFICER_ID = "02588581";
     private static final String NATURAL = "natural";
+    private static final String DELETE = "delete";
     private static final String NATURAL_URL = String.format("/disqualified-officers/%s/%s/internal", NATURAL, OFFICER_ID);
+    private static final String DELETE_URL = String.format("/disqualified-officers/%s/%s/internal", DELETE, OFFICER_ID);
 
     @Autowired
     private MockMvc mockMvc;
@@ -166,6 +169,32 @@ class DisqualifiedOfficerControllerTest {
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", "5342342")
                         .content(gson.toJson(request)))
+                .andExpect(status().isServiceUnavailable());
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer DELETE request")
+    public void callDisqualifiedOfficerDeleteRequest() throws Exception {
+
+        doNothing()
+                .when(disqualifiedOfficerService).deleteDisqualification(anyString(), anyString());
+
+        mockMvc.perform(delete(DELETE_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer DELETE request - ServiceUnavailable status code 503")
+    public void callDisqualifiedOfficerDeleteRequestServiceUnavailable() throws Exception {
+
+        doThrow(new ServiceUnavailableException("Service Unavailable - connection issues"))
+                .when(disqualifiedOfficerService).deleteDisqualification(anyString(), anyString());
+
+        mockMvc.perform(delete(DELETE_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342"))
                 .andExpect(status().isServiceUnavailable());
     }
 }

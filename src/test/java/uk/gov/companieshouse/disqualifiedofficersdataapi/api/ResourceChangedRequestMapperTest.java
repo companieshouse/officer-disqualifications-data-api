@@ -17,7 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceChangedRequestMapperTest {
@@ -44,6 +46,22 @@ public class ResourceChangedRequestMapperTest {
         ChangedResource actual = mapper.mapChangedResource(argument.getRequest());
 
         // then
+        assertEquals(argument.getChangedResource(), actual);
+    }
+
+    @Test
+    void testMapperCorpDelete() {
+        ResourceChangedTestArgument argument = corporateResourceDeletedScenarios();
+        when(timestampGenerator.get()).thenReturn(DATE);
+        ChangedResource actual = mapper.mapChangedResource(argument.getRequest(), new CorporateDisqualificationDocument());
+        assertEquals(argument.getChangedResource(), actual);
+    }
+
+    @Test
+    void testMapperNatDelete() {
+        ResourceChangedTestArgument argument = naturalResourceDeletedScenarios();
+        when(timestampGenerator.get()).thenReturn(DATE);
+        ChangedResource actual = mapper.mapChangedResource(argument.getRequest(), new NaturalDisqualificationDocument());
         assertEquals(argument.getChangedResource(), actual);
     }
 
@@ -76,6 +94,31 @@ public class ResourceChangedRequestMapperTest {
                         .withEventPublishedAt(DATE)
                         .build()
         );
+    }
+
+    static ResourceChangedTestArgument corporateResourceDeletedScenarios() {
+        return ResourceChangedTestArgument.builder()
+            .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE))
+            .withContextId(EXPECTED_CONTEXT_ID)
+            .withResourceUri("/disqualified-officers/corporate/CH4000056")
+            .withResourceKind("disqualified-officer-corporate")
+            .withEventType("deleted")
+            .withEventPublishedAt(DATE)
+            .withDeletedData(new CorporateDisqualificationDocument().getData())
+            .build();
+    }
+
+
+    static ResourceChangedTestArgument naturalResourceDeletedScenarios() {
+        return ResourceChangedTestArgument.builder()
+            .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL))
+            .withContextId(EXPECTED_CONTEXT_ID)
+            .withResourceUri("/disqualified-officers/natural/CH4000056")
+            .withResourceKind("disqualified-officer-natural")
+            .withEventType("deleted")
+            .withEventPublishedAt(DATE)
+            .withDeletedData(new NaturalDisqualificationDocument().getData())
+            .build();
     }
 
     static class ResourceChangedTestArgument {
@@ -112,6 +155,7 @@ public class ResourceChangedRequestMapperTest {
         private String contextId;
         private String eventType;
         private String eventPublishedAt;
+        private Object deletedData;
 
         public ResourceChangedTestArgumentBuilder withRequest(ResourceChangedRequest request) {
             this.request = request;
@@ -143,6 +187,11 @@ public class ResourceChangedRequestMapperTest {
             return this;
         }
 
+        public ResourceChangedTestArgumentBuilder withDeletedData(Object deletedData) {
+            this.deletedData = deletedData;
+            return this;
+        }
+
         public ResourceChangedTestArgument build() {
             ChangedResource changedResource = new ChangedResource();
             changedResource.setResourceUri(this.resourceUri);
@@ -152,6 +201,7 @@ public class ResourceChangedRequestMapperTest {
             event.setType(this.eventType);
             event.setPublishedAt(this.eventPublishedAt);
             changedResource.setEvent(event);
+            changedResource.setDeletedData(deletedData);
             return new ResourceChangedTestArgument(this.request, changedResource);
         }
     }
