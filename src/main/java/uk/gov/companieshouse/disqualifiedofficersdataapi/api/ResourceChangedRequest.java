@@ -45,7 +45,7 @@ public class ResourceChangedRequest {
         ResourceChangedRequest that = (ResourceChangedRequest) o;
         return Objects.equals(contextId, that.contextId) && Objects.equals(
                 officerId, that.officerId) && type == that.type && 
-                this.disqualificationData == that.disqualificationData;
+                disqualificationData == that.disqualificationData;
     }
 
     @Override
