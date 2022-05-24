@@ -1,4 +1,4 @@
-Feature: Respone codes scenarios for disqualification officer
+Feature: Response codes scenarios for disqualification officer
 
   Scenario Outline: Processing disqualified officers information unsuccessfully
 
