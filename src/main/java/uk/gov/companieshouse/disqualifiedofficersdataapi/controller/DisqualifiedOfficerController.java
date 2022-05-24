@@ -131,7 +131,7 @@ public class DisqualifiedOfficerController {
     /**
      * Delete disqualification information for an officer id.
      *
-     * @param  officer_id  the officer id to be deleted
+     * @param  officerId  the officer id to be deleted
      * @return return 200 status with empty body
      */
     @DeleteMapping("/disqualified-officers/delete/{officer_id}/internal")
@@ -139,9 +139,8 @@ public class DisqualifiedOfficerController {
             @RequestHeader("x-request-id") String contextId,
             @PathVariable("officer_id") String officerId) {
         logger.info(String.format(
-                "Deleting disqualified officer information for officer id %s",
-                officerId));
-                service.deleteDisqualification(contextId, officerId);
+                "Deleting disqualified officer information for officer id %s", officerId));
+        service.deleteDisqualification(contextId, officerId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

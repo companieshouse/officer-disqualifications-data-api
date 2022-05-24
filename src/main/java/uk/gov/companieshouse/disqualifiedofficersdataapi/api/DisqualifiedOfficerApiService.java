@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
 import java.util.function.Function;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +13,6 @@ import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResource
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
 import uk.gov.companieshouse.logging.Logger;
 
 @Service
@@ -26,8 +23,6 @@ public class DisqualifiedOfficerApiService {
     private final String chsKafkaUrl;
     private final ApiClientService apiClientService;
     private final Function<ResourceChangedRequest, ChangedResource> mapper;
-    private final BiFunction<ResourceChangedRequest, CorporateDisqualificationDocument, ChangedResource> corpDeleteMapper;
-    private final BiFunction<ResourceChangedRequest, NaturalDisqualificationDocument, ChangedResource> natDeleteMapper;
 
     /**
      * Invoke API.
@@ -36,15 +31,11 @@ public class DisqualifiedOfficerApiService {
             ApiClientService apiClientService,
             Logger logger,
             Supplier<String> timestampGenerator,
-            Function<ResourceChangedRequest, ChangedResource> mapper,
-            BiFunction<ResourceChangedRequest, CorporateDisqualificationDocument, ChangedResource> corpDeleteMapper,
-            BiFunction<ResourceChangedRequest, NaturalDisqualificationDocument, ChangedResource> natDeleteMapper) {
+            Function<ResourceChangedRequest, ChangedResource> mapper) {
         this.chsKafkaUrl = chsKafkaUrl;
         this.apiClientService = apiClientService;
         this.logger = logger;
         this.mapper = mapper;
-        this.corpDeleteMapper = corpDeleteMapper;
-        this.natDeleteMapper = natDeleteMapper;
     }
 
 
@@ -60,42 +51,6 @@ public class DisqualifiedOfficerApiService {
         PrivateChangedResourcePost changedResourcePost =
                 internalApiClient.privateChangedResourceHandler().postChangedResource(
                         CHANGED_RESOURCE_URI, mapper.apply(resourceChangedRequest));
-
-        return handleApiCall(changedResourcePost);
-    }
-
-    /**
-     * Calls the CHS Kafka api.
-     * @param resourceChangedRequest encapsulates details relating to the updated or deleted officer
-     * @param document corporate disqualification document used to pass api object to deleted data
-     * @return the response from the kafka api
-     */
-    public ApiResponse<Void>  invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest,
-            CorporateDisqualificationDocument document) {
-        InternalApiClient internalApiClient = apiClientService.getInternalApiClient();
-        internalApiClient.setBasePath(chsKafkaUrl);
-
-        PrivateChangedResourcePost changedResourcePost =
-                internalApiClient.privateChangedResourceHandler().postChangedResource(
-                        CHANGED_RESOURCE_URI, corpDeleteMapper.apply(resourceChangedRequest, document));
-
-        return handleApiCall(changedResourcePost);
-    }
-
-    /**
-     * Calls the CHS Kafka api.
-     * @param resourceChangedRequest encapsulates details relating to the updated or deleted officer
-     * @param document natural disqualification document used to pass api object to deleted data
-     * @return the response from the kafka api
-     */
-    public ApiResponse<Void>  invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest,
-            NaturalDisqualificationDocument document) {
-        InternalApiClient internalApiClient = apiClientService.getInternalApiClient();
-        internalApiClient.setBasePath(chsKafkaUrl);
-
-        PrivateChangedResourcePost changedResourcePost =
-                internalApiClient.privateChangedResourceHandler().postChangedResource(
-                        CHANGED_RESOURCE_URI, natDeleteMapper.apply(resourceChangedRequest, document));
 
         return handleApiCall(changedResourcePost);
     }

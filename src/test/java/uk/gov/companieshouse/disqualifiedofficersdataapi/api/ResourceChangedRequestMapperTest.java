@@ -17,9 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
+import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceChangedRequestMapperTest {
@@ -50,22 +50,6 @@ public class ResourceChangedRequestMapperTest {
     }
 
     @Test
-    void testMapperCorpDelete() {
-        ResourceChangedTestArgument argument = corporateResourceDeletedScenarios();
-        when(timestampGenerator.get()).thenReturn(DATE);
-        ChangedResource actual = mapper.mapChangedResource(argument.getRequest(), new CorporateDisqualificationDocument());
-        assertEquals(argument.getChangedResource(), actual);
-    }
-
-    @Test
-    void testMapperNatDelete() {
-        ResourceChangedTestArgument argument = naturalResourceDeletedScenarios();
-        when(timestampGenerator.get()).thenReturn(DATE);
-        ChangedResource actual = mapper.mapChangedResource(argument.getRequest(), new NaturalDisqualificationDocument());
-        assertEquals(argument.getChangedResource(), actual);
-    }
-
-    @Test
     void testMapperThrowsIllegalStateExceptionIfResourceTypeNull() {
         // when
         Executable executable = () -> mapper.mapChangedResource(request);
@@ -78,7 +62,7 @@ public class ResourceChangedRequestMapperTest {
     static Stream<ResourceChangedTestArgument> resourceChangedScenarios() {
         return Stream.of(
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL))
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL, null))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/natural/CH4000056")
                         .withResourceKind("disqualified-officer-natural")
@@ -86,39 +70,32 @@ public class ResourceChangedRequestMapperTest {
                         .withEventPublishedAt(DATE)
                         .build(),
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE))
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE, null))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/corporate/CH4000056")
                         .withResourceKind("disqualified-officer-corporate")
                         .withEventType("changed")
                         .withEventPublishedAt(DATE)
+                        .build(),
+                ResourceChangedTestArgument.builder()
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE, new CorporateDisqualificationApi()))
+                        .withContextId(EXPECTED_CONTEXT_ID)
+                        .withResourceUri("/disqualified-officers/corporate/CH4000056")
+                        .withResourceKind("disqualified-officer-corporate")
+                        .withEventType("deleted")
+                        .withEventPublishedAt(DATE)
+                        .withDeletedData(new CorporateDisqualificationApi())
+                        .build(),
+                ResourceChangedTestArgument.builder()
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL, new NaturalDisqualificationApi()))
+                        .withContextId(EXPECTED_CONTEXT_ID)
+                        .withResourceUri("/disqualified-officers/natural/CH4000056")
+                        .withResourceKind("disqualified-officer-natural")
+                        .withEventType("deleted")
+                        .withEventPublishedAt(DATE)
+                        .withDeletedData(new NaturalDisqualificationApi())
                         .build()
         );
-    }
-
-    static ResourceChangedTestArgument corporateResourceDeletedScenarios() {
-        return ResourceChangedTestArgument.builder()
-            .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE))
-            .withContextId(EXPECTED_CONTEXT_ID)
-            .withResourceUri("/disqualified-officers/corporate/CH4000056")
-            .withResourceKind("disqualified-officer-corporate")
-            .withEventType("deleted")
-            .withEventPublishedAt(DATE)
-            .withDeletedData(new CorporateDisqualificationDocument().getData())
-            .build();
-    }
-
-
-    static ResourceChangedTestArgument naturalResourceDeletedScenarios() {
-        return ResourceChangedTestArgument.builder()
-            .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL))
-            .withContextId(EXPECTED_CONTEXT_ID)
-            .withResourceUri("/disqualified-officers/natural/CH4000056")
-            .withResourceKind("disqualified-officer-natural")
-            .withEventType("deleted")
-            .withEventPublishedAt(DATE)
-            .withDeletedData(new NaturalDisqualificationDocument().getData())
-            .build();
     }
 
     static class ResourceChangedTestArgument {

@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import java.util.function.Function;
-import java.util.function.BiFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
@@ -18,8 +17,6 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedC
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedCorporateOfficerWriteConverter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedNaturalOfficerReadConverter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedNaturalOfficerWriteConverter;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.serialization.LocalDateDeSerializer;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.serialization.LocalDateSerializer;
 
@@ -52,18 +49,6 @@ public class ApplicationConfig {
 
     @Bean
     public Function<ResourceChangedRequest, ChangedResource> mapper() {
-        ResourceChangedRequestMapper mapper = new ResourceChangedRequestMapper(offsetDateTimeGenerator());
-        return mapper::mapChangedResource;
-    }
-
-    @Bean
-    public BiFunction<ResourceChangedRequest, CorporateDisqualificationDocument, ChangedResource> corporateMapper() {
-        ResourceChangedRequestMapper mapper = new ResourceChangedRequestMapper(offsetDateTimeGenerator());
-        return mapper::mapChangedResource;
-    }
-
-    @Bean
-    public BiFunction<ResourceChangedRequest, NaturalDisqualificationDocument, ChangedResource> naturalMapper() {
         ResourceChangedRequestMapper mapper = new ResourceChangedRequestMapper(offsetDateTimeGenerator());
         return mapper::mapChangedResource;
     }

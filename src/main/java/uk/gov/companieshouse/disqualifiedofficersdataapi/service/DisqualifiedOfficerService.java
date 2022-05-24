@@ -101,7 +101,8 @@ public class DisqualifiedOfficerService {
         CorporateDisqualificationDocument document = retrieveCorporateDisqualification(officerId);
         repository.delete(document);
         disqualifiedOfficerApiService.invokeChsKafkaApi(
-                new ResourceChangedRequest(contextId, officerId, DisqualificationResourceType.CORPORATE), document);
+                new ResourceChangedRequest(contextId, officerId, 
+                        DisqualificationResourceType.CORPORATE, document.getData()));
     }
 
     /**
@@ -113,7 +114,8 @@ public class DisqualifiedOfficerService {
         NaturalDisqualificationDocument document = retrieveNaturalDisqualification(officerId);
         repository.delete(document);
         disqualifiedOfficerApiService.invokeChsKafkaApi(
-                new ResourceChangedRequest(contextId, officerId, DisqualificationResourceType.NATURAL), document);
+                new ResourceChangedRequest(contextId, officerId, 
+                        DisqualificationResourceType.NATURAL, document.getData()));
     }
 
     /**
@@ -153,7 +155,9 @@ public class DisqualifiedOfficerService {
         }
         
         if (savedToDb) {
-            disqualifiedOfficerApiService.invokeChsKafkaApi(new ResourceChangedRequest(contextId, officerId, type));
+            disqualifiedOfficerApiService.invokeChsKafkaApi(
+                    new ResourceChangedRequest(contextId, officerId, 
+                            type, null));
         }
     }
 

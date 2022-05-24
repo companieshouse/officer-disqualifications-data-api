@@ -30,7 +30,8 @@ public class DisqualificationSteps {
         verify(disqualifiedApiService).invokeChsKafkaApi(new ResourceChangedRequest(
                 CucumberContext.CONTEXT.get("contextId"),
                 officerId,
-                CucumberContext.CONTEXT.get("officerType")
+                CucumberContext.CONTEXT.get("officerType"),
+                null
         ));
     }
 
