@@ -4,8 +4,8 @@ Feature: Respone codes scenarios for disqualification officer
 
     Given disqualified officers data api service is running
     When I send natural PUT request with payload "<data>" file
-    And the CHS Kafka API is not invoked
     Then I should receive <response_code> status code
+    And the CHS Kafka API is not invoked
     And nothing is persisted in the database
 
     Examples:
