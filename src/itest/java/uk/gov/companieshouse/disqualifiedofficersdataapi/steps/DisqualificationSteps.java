@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.List;
 
 import com.github.dockerjava.api.exception.InternalServerErrorException;
-import io.cucumber.java.en.*;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -16,6 +18,8 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationD
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
