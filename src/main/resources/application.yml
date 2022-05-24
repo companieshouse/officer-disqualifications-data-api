@@ -10,6 +10,7 @@ chs:
     api:
       endpoint: ${CHS_KAFKA_API_URL:localhost}
       key: ${CHS_API_KEY:chsApiKey}
+      enabled: ${DSQ_STREAM_HOOK_ENABLED:true}
 
 logger:
   namespace: disqualified-officer-data-api
