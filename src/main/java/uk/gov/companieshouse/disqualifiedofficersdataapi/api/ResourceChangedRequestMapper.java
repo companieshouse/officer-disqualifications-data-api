@@ -29,7 +29,7 @@ public class ResourceChangedRequestMapper {
         }
 
         ChangedResourceEvent event = new ChangedResourceEvent();
-        if (request.getDisqualificationData() != null) {
+        if (request.getIsDelete()) {
             event.setType("deleted");
             changedResource.setDeletedData(request.getDisqualificationData());
         } else {

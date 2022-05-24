@@ -62,7 +62,7 @@ public class ResourceChangedRequestMapperTest {
     static Stream<ResourceChangedTestArgument> resourceChangedScenarios() {
         return Stream.of(
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL, null))
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL, null, false))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/natural/CH4000056")
                         .withResourceKind("disqualified-officer-natural")
@@ -70,7 +70,7 @@ public class ResourceChangedRequestMapperTest {
                         .withEventPublishedAt(DATE)
                         .build(),
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE, null))
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE, null, false))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/corporate/CH4000056")
                         .withResourceKind("disqualified-officer-corporate")
@@ -78,7 +78,7 @@ public class ResourceChangedRequestMapperTest {
                         .withEventPublishedAt(DATE)
                         .build(),
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE, new CorporateDisqualificationApi()))
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE, new CorporateDisqualificationApi(), true))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/corporate/CH4000056")
                         .withResourceKind("disqualified-officer-corporate")
@@ -87,7 +87,7 @@ public class ResourceChangedRequestMapperTest {
                         .withDeletedData(new CorporateDisqualificationApi())
                         .build(),
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL, new NaturalDisqualificationApi()))
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL, new NaturalDisqualificationApi(), true))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/natural/CH4000056")
                         .withResourceKind("disqualified-officer-natural")

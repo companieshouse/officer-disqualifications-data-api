@@ -9,13 +9,15 @@ public class ResourceChangedRequest {
     private final String officerId;
     private final DisqualificationResourceType type;
     private final Object disqualificationData;
+    private final Boolean isDelete;
 
     public ResourceChangedRequest(String contextId, String officerId, DisqualificationResourceType type, 
-            Object disqualificationData) {
+            Object disqualificationData, Boolean isDelete) {
         this.contextId = contextId;
         this.officerId = officerId;
         this.type = type;
         this.disqualificationData = disqualificationData;
+        this.isDelete = isDelete;
     }
 
     public String getContextId() {
@@ -34,6 +36,10 @@ public class ResourceChangedRequest {
         return disqualificationData;
     }
 
+    public Boolean getIsDelete() {
+        return isDelete;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -44,12 +50,13 @@ public class ResourceChangedRequest {
         }
         ResourceChangedRequest that = (ResourceChangedRequest) o;
         return Objects.equals(contextId, that.contextId) && Objects.equals(
-                officerId, that.officerId) && type == that.type && 
-                disqualificationData == that.disqualificationData;
+                officerId, that.officerId) && type == that.type &&
+                disqualificationData == that.disqualificationData &&
+                isDelete == that.isDelete;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(contextId, officerId, type, disqualificationData);
+        return Objects.hash(contextId, officerId, type, disqualificationData, isDelete);
     }
 }

@@ -97,7 +97,7 @@ public class DisqualifiedOfficerApiClientServiceTest {
 
         Assert.assertThrows(RuntimeException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi
                 (new ResourceChangedRequest("3245435", "CH4000056",
-                        DisqualificationResourceType.NATURAL, null)));
+                        DisqualificationResourceType.NATURAL, null, false)));
 
         verify(apiClientService, times(1)).getInternalApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();

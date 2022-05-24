@@ -67,7 +67,8 @@ public class DisqualificationSteps {
             CucumberContext.CONTEXT.get("contextId"),
             officerId,
             CucumberContext.CONTEXT.get("officerType"),
-            null
+            null,
+            false
         ));
     }
 
