@@ -38,9 +38,10 @@ public class DisqualifiedOfficerApiService {
         this.mapper = mapper;
     }
 
+
     /**
      * Calls the CHS Kafka api.
-     * @param resourceChangedRequest encapsulates details relating to the updated officer
+     * @param resourceChangedRequest encapsulates details relating to the updated or deleted officer
      * @return the response from the kafka api
      */
     public ApiResponse<Void> invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
@@ -51,6 +52,10 @@ public class DisqualifiedOfficerApiService {
                 internalApiClient.privateChangedResourceHandler().postChangedResource(
                         CHANGED_RESOURCE_URI, mapper.apply(resourceChangedRequest));
 
+        return handleApiCall(changedResourcePost);
+    }
+
+    private ApiResponse<Void> handleApiCall(PrivateChangedResourcePost changedResourcePost) {
         try {
             return changedResourcePost.execute();
         } catch (ApiErrorResponseException exp) {

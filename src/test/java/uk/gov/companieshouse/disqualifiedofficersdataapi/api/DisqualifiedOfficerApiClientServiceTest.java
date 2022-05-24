@@ -2,6 +2,7 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
+
 import java.util.function.Function;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -96,7 +97,7 @@ public class DisqualifiedOfficerApiClientServiceTest {
 
         Assert.assertThrows(RuntimeException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi
                 (new ResourceChangedRequest("3245435", "CH4000056",
-                        DisqualificationResourceType.NATURAL)));
+                        DisqualificationResourceType.NATURAL, null, false)));
 
         verify(apiClientService, times(1)).getInternalApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();

@@ -4,7 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
@@ -120,5 +126,21 @@ public class DisqualifiedOfficerController {
         data.setPersonNumber(null);
 
         return ResponseEntity.status(HttpStatus.OK).body(disqualification.getData());
+    }
+
+    /**
+     * Delete disqualification information for an officer id.
+     *
+     * @param  officerId  the officer id to be deleted
+     * @return return 200 status with empty body
+     */
+    @DeleteMapping("/disqualified-officers/delete/{officer_id}/internal")
+    public ResponseEntity<Void> deleteDisqualification(
+            @RequestHeader("x-request-id") String contextId,
+            @PathVariable("officer_id") String officerId) {
+        logger.info(String.format(
+                "Deleting disqualified officer information for officer id %s", officerId));
+        service.deleteDisqualification(contextId, officerId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

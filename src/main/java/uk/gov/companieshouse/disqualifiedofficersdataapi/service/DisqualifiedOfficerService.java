@@ -79,6 +79,46 @@ public class DisqualifiedOfficerService {
     }
 
     /**
+     * Find and delete a disqualification record.
+     * @param contextId passed into the call to changed-resource
+     * @param officerId used to find the document to delete
+     */
+    public void deleteDisqualification(String contextId, String officerId) {
+        DisqualificationDocument document = retrieveDeleteDisqualification(officerId);
+        if (document.isCorporateOfficer()) {
+            deleteCorporateDisqualification(contextId, officerId);
+        } else {
+            deleteNaturalDisqualification(contextId, officerId);
+        }
+    }
+
+    /**
+     * Delete a corporate disqualification record.
+     * @param contextId passed into the call to changed-resource
+     * @param officerId used to find the document to delete
+     */
+    private void deleteCorporateDisqualification(String contextId, String officerId) {
+        CorporateDisqualificationDocument document = retrieveCorporateDisqualification(officerId);
+        repository.delete(document);
+        disqualifiedOfficerApiService.invokeChsKafkaApi(
+                new ResourceChangedRequest(contextId, officerId, 
+                        DisqualificationResourceType.CORPORATE, document.getData(), true));
+    }
+
+    /**
+     * Delete a natural disqualification record.
+     * @param contextId passed into the call to changed-resource
+     * @param officerId used to find the document to delete
+     */
+    private void deleteNaturalDisqualification(String contextId, String officerId) {
+        NaturalDisqualificationDocument document = retrieveNaturalDisqualification(officerId);
+        repository.delete(document);
+        disqualifiedOfficerApiService.invokeChsKafkaApi(
+                new ResourceChangedRequest(contextId, officerId, 
+                        DisqualificationResourceType.NATURAL, document.getData(), true));
+    }
+
+    /**
      * Check the record hasn't been update more recently
      * @param officerId Mongo Id
      * @param deltaAt   Time of update
@@ -115,7 +155,9 @@ public class DisqualifiedOfficerService {
         }
         
         if (savedToDb) {
-            disqualifiedOfficerApiService.invokeChsKafkaApi(new ResourceChangedRequest(contextId, officerId, type));
+            disqualifiedOfficerApiService.invokeChsKafkaApi(
+                    new ResourceChangedRequest(contextId, officerId, 
+                            type, null, false));
         }
     }
 
@@ -128,6 +170,15 @@ public class DisqualifiedOfficerService {
         Optional<DisqualificationDocument> doc = repository.findById(officerId);
 
         return doc.isPresent() ? doc.get().getCreated(): null;
+    }
+
+    public DisqualificationDocument retrieveDeleteDisqualification(String officerId) {
+        Optional<DisqualificationDocument> disqualificationDocumentOptional = 
+                repository.findById(officerId);
+        DisqualificationDocument disqualificationDocument = disqualificationDocumentOptional.orElseThrow(
+                () -> new IllegalArgumentException(String.format(
+                "Resource not found for officer ID: %s", officerId)));
+        return disqualificationDocument;
     }
 
     public NaturalDisqualificationDocument retrieveNaturalDisqualification(String officerId) {

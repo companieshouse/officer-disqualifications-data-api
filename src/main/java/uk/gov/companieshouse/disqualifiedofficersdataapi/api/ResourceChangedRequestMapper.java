@@ -1,9 +1,11 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
 import java.util.function.Supplier;
+
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
+
 
 public class ResourceChangedRequestMapper {
 
@@ -27,7 +29,12 @@ public class ResourceChangedRequestMapper {
         }
 
         ChangedResourceEvent event = new ChangedResourceEvent();
-        event.setType("changed");
+        if (request.getIsDelete()) {
+            event.setType("deleted");
+            changedResource.setDeletedData(request.getDisqualificationData());
+        } else {
+            event.setType("changed");
+        }
         event.publishedAt(this.timestampGenerator.get());
 
         changedResource.event(event);

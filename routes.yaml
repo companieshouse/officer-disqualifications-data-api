@@ -7,3 +7,4 @@ routes:
   3: ^/disqualified-officers/corporate/(.*)/internal
   4: ^/disqualified-officers/natural/(.*)
   5: ^/disqualified-officers/corporate/(.*)
+  6: ^/disqualified-officers/delete/(.*)/internal
