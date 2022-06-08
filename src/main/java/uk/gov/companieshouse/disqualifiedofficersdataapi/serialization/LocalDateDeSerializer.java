@@ -26,7 +26,10 @@ public class LocalDateDeSerializer extends JsonDeserializer<LocalDate> {
                     .ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
             JsonNode jsonNode = jsonParser.readValueAsTree();
             JsonNode dateNode = jsonNode.get("$date");
-            return dateNode.textValue() != null ? 
+
+            //If textValue() returns a value we received a string of format yyyy-MM-dd'T'HH:mm:ss'Z and dateTimeFormatter to return LocalDate
+            //Otherwise we received a long of milliseconds away from 01/01/1970 and need to return LocalDate without dateTimeFormatter
+            return dateNode.textValue() != null ?
                     LocalDate.parse(dateNode.textValue(), dateTimeFormatter) :
                     LocalDate.ofInstant(Instant.ofEpochMilli(dateNode.get("$numberLong").asLong()), ZoneId.systemDefault());
         } catch (Exception exception) {
