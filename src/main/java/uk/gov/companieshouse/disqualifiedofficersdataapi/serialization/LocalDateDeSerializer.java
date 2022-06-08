@@ -8,7 +8,9 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestEx
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class LocalDateDeSerializer extends JsonDeserializer<LocalDate> {
@@ -23,7 +25,10 @@ public class LocalDateDeSerializer extends JsonDeserializer<LocalDate> {
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter
                     .ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
             JsonNode jsonNode = jsonParser.readValueAsTree();
-            return LocalDate.parse(jsonNode.get("$date").textValue(), dateTimeFormatter);
+            JsonNode dateNode = jsonNode.get("$date");
+            return dateNode.textValue() != null ? 
+                    LocalDate.parse(dateNode.textValue(), dateTimeFormatter) :
+                    LocalDate.ofInstant(Instant.ofEpochMilli(dateNode.get("$numberLong").asLong()), ZoneId.systemDefault());
         } catch (Exception exception) {
             LOGGER.error("Deserialization failed.", exception);
             throw new BadRequestException(exception.getMessage());

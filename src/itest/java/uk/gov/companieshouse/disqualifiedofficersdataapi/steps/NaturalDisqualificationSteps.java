@@ -29,7 +29,6 @@ import static uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractM
 
 public class NaturalDisqualificationSteps {
 
-    private String officerId;
     private String contextId;
 
     @Autowired
@@ -97,13 +96,12 @@ public class NaturalDisqualificationSteps {
         CucumberContext.CONTEXT.set("contextId", this.contextId);
         headers.set("x-request-id", this.contextId);
 
-        HttpEntity request = new HttpEntity(data, headers);
+        HttpEntity<String> request = new HttpEntity<String>(data, headers);
         String uri = "/disqualified-officers/natural/{officerId}/internal";
         CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.NATURAL);
         String officerId = "1234567890";
         ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, officerId);
 
-        this.officerId = officerId;
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
     }
 
@@ -116,6 +114,7 @@ public class NaturalDisqualificationSteps {
 
         assertThat(expected.getSurname()).isEqualTo(actual.getSurname());
         assertThat(expected.getDisqualifications()).isEqualTo(actual.getDisqualifications());
+        assertThat(expected.getDateOfBirth()).isEqualTo(actual.getDateOfBirth());
     }
 
     @After
