@@ -10,6 +10,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -28,102 +29,102 @@ public class ExceptionHandlerConfig {
         this.logger = logger;
     }
 
-    /**
-     * Runtime exception handler. Acts as the catch-all scenario.
-     *
-     * @param ex      exception to handle.
-     * @param request request.
-     * @return error response to return.
-     */
-    @ExceptionHandler(value = {Exception.class})
-    public ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
-        logger.error(String.format("Unexpected exception, response code: %s",
-                HttpStatus.INTERNAL_SERVER_ERROR), ex);
+     /**
+      * Runtime exception handler. Acts as the catch-all scenario.
+      *
+      * @param ex      exception to handle.
+      * @param request request.
+      * @return error response to return.
+      */
+     @ExceptionHandler(value = {Exception.class})
+     public ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
+         logger.error(String.format("Unexpected exception, response code: %s",
+                 HttpStatus.INTERNAL_SERVER_ERROR), ex);
 
-        Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", "Unable to process the request.");
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
-        return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+         Map<String, Object> responseBody = new LinkedHashMap<>();
+         responseBody.put("timestamp", LocalDateTime.now());
+         responseBody.put("message", "Unable to process the request.");
+         request.setAttribute("javax.servlet.error.exception", ex, 0);
+         return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
+     }
 
-    /**
-     * IllegalArgumentException exception handler.
-     *
-     * @param ex      exception to handle.
-     * @param request request.
-     * @return error response to return.
-     */
-    @ExceptionHandler(value = {IllegalArgumentException.class})
-    public ResponseEntity<Object> handleNotFoundException(Exception ex, WebRequest request) {
-        logger.error(String.format("Resource not found, response code: %s",
-                HttpStatus.NOT_FOUND), ex);
+     /**
+      * IllegalArgumentException exception handler.
+      *
+      * @param ex      exception to handle.
+      * @param request request.
+      * @return error response to return.
+      */
+     @ExceptionHandler(value = {IllegalArgumentException.class})
+     public ResponseEntity<Object> handleNotFoundException(Exception ex, WebRequest request) {
+         logger.error(String.format("Resource not found, response code: %s",
+                 HttpStatus.NOT_FOUND), ex);
 
-        Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", "Resource not found.");
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
-        return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
-    }
+         Map<String, Object> responseBody = new LinkedHashMap<>();
+         responseBody.put("timestamp", LocalDateTime.now());
+         responseBody.put("message", "Resource not found.");
+         request.setAttribute("javax.servlet.error.exception", ex, 0);
+         return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+     }
 
-    /**
-     * MethodNotAllowedException exception handler.
-     *
-     * @param ex      exception to handle.
-     * @param request request.
-     * @return error response to return.
-     */
-    @ExceptionHandler(value = {MethodNotAllowedException.class})
-    public ResponseEntity<Object> handleMethodNotAllowedException(Exception ex,
-                                                                  WebRequest request) {
-        logger.error(String.format("Unable to process the request, response code: %s",
-                HttpStatus.METHOD_NOT_ALLOWED), ex);
+     /**
+      * MethodNotAllowedException exception handler.
+      *
+      * @param ex      exception to handle.
+      * @param request request.
+      * @return error response to return.
+      */
+     @ExceptionHandler(value = {MethodNotAllowedException.class, HttpRequestMethodNotSupportedException.class})
+     public ResponseEntity<Object> handleMethodNotAllowedException(Exception ex,
+                                                                   WebRequest request) {
+         logger.error(String.format("Unable to process the request, response code: %s",
+                 HttpStatus.METHOD_NOT_ALLOWED), ex);
 
-        Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", "Unable to process the request.");
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
-        return new ResponseEntity<>(responseBody, HttpStatus.METHOD_NOT_ALLOWED);
-    }
+         Map<String, Object> responseBody = new LinkedHashMap<>();
+         responseBody.put("timestamp", LocalDateTime.now());
+         responseBody.put("message", "Unable to process the request.");
+         request.setAttribute("javax.servlet.error.exception", ex, 0);
+         return new ResponseEntity<>(responseBody, HttpStatus.METHOD_NOT_ALLOWED);
+     }
 
-    /**
-     * ServiceUnavailableException exception handler.
-     * To be thrown when there are connection issues.
-     *
-     * @param ex      exception to handle.
-     * @param request request.
-     * @return error response to return.
-     */
-    @ExceptionHandler(value = {ServiceUnavailableException.class, DataAccessException.class})
-    public ResponseEntity<Object> handleServiceUnavailableException(Exception ex,
-                                                                    WebRequest request) {
-        logger.error(String.format("Service unavailable, response code: %s",
-                HttpStatus.SERVICE_UNAVAILABLE), ex);
+     /**
+      * ServiceUnavailableException exception handler.
+      * To be thrown when there are connection issues.
+      *
+      * @param ex      exception to handle.
+      * @param request request.
+      * @return error response to return.
+      */
+     @ExceptionHandler(value = {ServiceUnavailableException.class, DataAccessException.class})
+     public ResponseEntity<Object> handleServiceUnavailableException(Exception ex,
+                                                                     WebRequest request) {
+         logger.error(String.format("Service unavailable, response code: %s",
+                 HttpStatus.SERVICE_UNAVAILABLE), ex);
 
-        Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", "Service unavailable.");
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
-        return new ResponseEntity<>(responseBody, HttpStatus.SERVICE_UNAVAILABLE);
-    }
+         Map<String, Object> responseBody = new LinkedHashMap<>();
+         responseBody.put("timestamp", LocalDateTime.now());
+         responseBody.put("message", "Service unavailable.");
+         request.setAttribute("javax.servlet.error.exception", ex, 0);
+         return new ResponseEntity<>(responseBody, HttpStatus.SERVICE_UNAVAILABLE);
+     }
 
-    /**
-     * BadRequestException exception handler.
-     * Thrown when data is given in the wrong format.
-     *
-     * @param ex      exception to handle.
-     * @param request request.
-     * @return error response to return.
-     */
-    @ExceptionHandler(value = {BadRequestException.class, DateTimeParseException.class,
-        HttpMessageNotReadableException.class})
-    public ResponseEntity<Object> handleBadRequestException(Exception ex, WebRequest request) {
-        logger.error(String.format("Bad request, response code: %s", HttpStatus.BAD_REQUEST), ex);
+     /**
+      * BadRequestException exception handler.
+      * Thrown when data is given in the wrong format.
+      *
+      * @param ex      exception to handle.
+      * @param request request.
+      * @return error response to return.
+      */
+     @ExceptionHandler(value = {BadRequestException.class, DateTimeParseException.class,
+         HttpMessageNotReadableException.class})
+     public ResponseEntity<Object> handleBadRequestException(Exception ex, WebRequest request) {
+         logger.error(String.format("Bad request, response code: %s", HttpStatus.BAD_REQUEST), ex);
 
-        Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", "Bad request.");
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
-        return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-    }
+         Map<String, Object> responseBody = new LinkedHashMap<>();
+         responseBody.put("timestamp", LocalDateTime.now());
+         responseBody.put("message", "Bad request.");
+         request.setAttribute("javax.servlet.error.exception", ex, 0);
+         return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+     }
 }
