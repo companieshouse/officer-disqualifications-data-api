@@ -10,6 +10,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -30,11 +31,11 @@ public class ExceptionHandlerConfig {
 
     /**
      * Runtime exception handler. Acts as the catch-all scenario.
-     *
-     * @param ex      exception to handle.
-     * @param request request.
-     * @return error response to return.
-     */
+    *
+    * @param ex      exception to handle.
+    * @param request request.
+    * @return error response to return.
+    */
     @ExceptionHandler(value = {Exception.class})
     public ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
         logger.error(String.format("Unexpected exception, response code: %s",
@@ -49,11 +50,11 @@ public class ExceptionHandlerConfig {
 
     /**
      * IllegalArgumentException exception handler.
-     *
-     * @param ex      exception to handle.
-     * @param request request.
-     * @return error response to return.
-     */
+    *
+    * @param ex      exception to handle.
+    * @param request request.
+    * @return error response to return.
+    */
     @ExceptionHandler(value = {IllegalArgumentException.class})
     public ResponseEntity<Object> handleNotFoundException(Exception ex, WebRequest request) {
         logger.error(String.format("Resource not found, response code: %s",
@@ -68,14 +69,14 @@ public class ExceptionHandlerConfig {
 
     /**
      * MethodNotAllowedException exception handler.
-     *
-     * @param ex      exception to handle.
-     * @param request request.
-     * @return error response to return.
-     */
-    @ExceptionHandler(value = {MethodNotAllowedException.class})
+    *
+    * @param ex      exception to handle.
+    * @param request request.
+    * @return error response to return.
+    */
+    @ExceptionHandler(value = {MethodNotAllowedException.class, HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<Object> handleMethodNotAllowedException(Exception ex,
-                                                                  WebRequest request) {
+                                                                WebRequest request) {
         logger.error(String.format("Unable to process the request, response code: %s",
                 HttpStatus.METHOD_NOT_ALLOWED), ex);
 
@@ -88,12 +89,12 @@ public class ExceptionHandlerConfig {
 
     /**
      * ServiceUnavailableException exception handler.
-     * To be thrown when there are connection issues.
-     *
-     * @param ex      exception to handle.
-     * @param request request.
-     * @return error response to return.
-     */
+    * To be thrown when there are connection issues.
+    *
+    * @param ex      exception to handle.
+    * @param request request.
+    * @return error response to return.
+    */
     @ExceptionHandler(value = {ServiceUnavailableException.class, DataAccessException.class})
     public ResponseEntity<Object> handleServiceUnavailableException(Exception ex,
                                                                     WebRequest request) {
@@ -109,12 +110,12 @@ public class ExceptionHandlerConfig {
 
     /**
      * BadRequestException exception handler.
-     * Thrown when data is given in the wrong format.
-     *
-     * @param ex      exception to handle.
-     * @param request request.
-     * @return error response to return.
-     */
+    * Thrown when data is given in the wrong format.
+    *
+    * @param ex      exception to handle.
+    * @param request request.
+    * @return error response to return.
+    */
     @ExceptionHandler(value = {BadRequestException.class, DateTimeParseException.class,
         HttpMessageNotReadableException.class})
     public ResponseEntity<Object> handleBadRequestException(Exception ex, WebRequest request) {
