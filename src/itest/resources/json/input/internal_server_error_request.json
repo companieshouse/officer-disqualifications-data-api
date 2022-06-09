@@ -1,0 +1,25 @@
+{
+    "external_data" : {
+      "person_number" : "2",
+      "date_of_birth" : "2022-04-05T12:51:00.767Z",
+      "etag" : "",
+      "title": "Mr",
+      "forename": "Dust",
+      "middle_name": "Condition Reserve",
+      "surname": "KINDNESSLIQUOR",
+      "honours": "",
+      "nationality": "British",
+      "registered_location": "Britain",
+      "disqualifications" : [],
+      "links" : {
+        "self" : "link"
+      }
+    },
+    "internal_data" : {
+      "delta_at" : null,
+      "officer_id" : "1234567890",
+      "officer_id_raw" : "1234567890",
+      "officer_disq_id" : "1234567890",
+      "officer_detail_id" : "1234567890"
+    }
+  }

@@ -42,17 +42,14 @@ public class ResourceChangedRequest {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         ResourceChangedRequest that = (ResourceChangedRequest) o;
-        return Objects.equals(contextId, that.contextId) && Objects.equals(
-                officerId, that.officerId) && type == that.type &&
-                disqualificationData == that.disqualificationData &&
-                isDelete == that.isDelete;
+        return Objects.equals(contextId, that.contextId) &&
+                Objects.equals(officerId, that.officerId) &&
+                type == that.type &&
+                Objects.equals(disqualificationData, that.disqualificationData) &&
+                Objects.equals(isDelete, that.isDelete);
     }
 
     @Override
