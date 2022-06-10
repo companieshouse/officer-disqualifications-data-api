@@ -5,7 +5,7 @@ Feature: Process corporate disqualified officer information
     Given disqualified officers data api service is running
     When I send corporate PUT request with payload "<data>" file
     Then I should receive 200 status code
-    And the CHS Kafka API is invoked successfully with "<officerId>"
+    And the CHS Kafka API is invoked with "<officerId>"
 
     Examples:
       | data                                  | officerId     |

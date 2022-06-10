@@ -1,59 +1,45 @@
 {
-  "date_of_birth": "1953-02-06",
-  "person_number": null,
-  "etag": "bd61fa22f9cacbf959334535069164f83e1fc2a0",
-  "forename": "Dust",
-  "honours": "",
-  "nationality": "British",
-  "other_forenames": "Condition Reserve",
-  "surname": "KINDNESSLIQUOR",
-  "title": "Mr",
-  "links": {
-    "self": "/disqualified-officers/natural/nRr-8Teoxjl5d7hwovzpJl7mYJ0"
-  },
-  "disqualifications": [
-    {
-      "case_identifier": "INV3975227",
-      "address": {
-        "premise": "30",
-        "address_line_1": "Lucy Road",
-        "address_line_2": "Skewen",
-        "locality": "Neath",
-        "region": "",
-        "country": "Wales",
-        "postal_code": "SA10 6RR"
-      },
-      "company_names": [
-        "CONSORTIUM TECHNOLOGY LIMITED"
-      ],
-      "court_name": null,
-      "disqualification_type": "undertaking",
-      "disqualified_from": "2015-02-18",
-      "disqualified_until": "2025-02-17",
-      "heard_on": null,
-      "undertaken_on": "2015-02-14",
-      "last_variation": {
-        "varied_on": "2021-02-17",
-        "case_identifier": "1",
-        "court_name": "Judys"
-      },
-      "reason": {
-        "act": "company-directors-disqualification-act-1986",
-        "section": "7",
-        "description_identifier": "order-or-undertaking-and-reporting-provisions"
-      }
-    }
-  ],
-  "permissions_to_act": [
-    {
-      "company_names": [
-        "123 LTD",
-        "321 LTD"
-      ],
-      "court_name": "rinder",
-      "expires_on": "2016-04-12",
-      "granted_on": "2014-02-03",
-      "purpose": null
-    }
-  ]
+    "date_of_birth": "2022-04-05",
+    "person_number": null,
+    "etag": "7a0ba73f960315629fa36fc41b4d325881773245",
+    "forename": "Dust",
+    "honours": "",
+    "nationality": "British",
+    "other_forenames": null,
+    "surname": "KINDNESSLIQUOR",
+    "title": "Mr",
+    "links": {
+        "self": "link"
+    },
+    "disqualifications": [
+        {
+            "case_identifier": "INV3975227",
+            "address": {
+                "premise": "30",
+                "address_line_1": "Lucy Road",
+                "address_line_2": "Skewen",
+                "locality": "Neath",
+                "region": "",
+                "country": "Wales",
+                "postal_code": "SA10 6RR"
+            },
+            "company_names": [
+                "CONSORTIUM TECHNOLOGY LIMITED"
+            ],
+            "court_name": "Insolvency Service",
+            "disqualification_type": "UNDERTAKING",
+            "disqualified_from": "2022-04-05",
+            "disqualified_until": "2022-04-05",
+            "heard_on": "2022-04-05",
+            "undertaken_on": "2022-04-05",
+            "last_variation": null,
+            "reason": {
+                "description_identifier": "string",
+                "section": "CDDA 1987",
+                "act": "7",
+                "article": "string"
+            }
+        }
+    ],
+    "permissions_to_act": null
 }

@@ -3,12 +3,14 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.steps;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
@@ -71,6 +73,7 @@ public class NaturalDisqualificationSteps {
         naturalDisqualification.setId(officerId);
 
         mongoTemplate.save(naturalDisqualification);
+        CucumberContext.CONTEXT.set("disqualificationData", natData);
     }
 
     @When("I send natural GET request with officer Id {string}")
