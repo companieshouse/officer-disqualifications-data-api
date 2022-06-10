@@ -6,7 +6,7 @@ Feature: Delete disqualification information
     And the natural disqualified officer information exists for "id_to_delete"
     When I send DELETE request with officer id "id_to_delete"
     Then I should receive 200 status code
-    And the CHS Kafka API is invoked successfully with "id_to_delete"
+    And the CHS Kafka API is invoked with "id_to_delete"
 
   Scenario: Delete disqualified officer information while database is down
 
@@ -25,13 +25,12 @@ Feature: Delete disqualification information
     Then I should receive 404 status code
     And the CHS Kafka API is not invoked
 
-  Scenario: Processing delete disqualified officer when kafka-api is not available
+  Scenario: Delete disqualified officer when kafka-api is not available
 
     Given disqualified officers data api service is running
     And the natural disqualified officer information exists for "id_to_delete"
     And CHS kafka API service is unavailable
     When I send DELETE request with officer id "id_to_delete"
     Then I should receive 503 status code
-    And the CHS Kafka API is invoked successfully with "id_to_delete"
-    And the disqualified officer with officer id "id_to_delete" still exists in the database
+    And officer id does not exists for "id_to_delete"
 

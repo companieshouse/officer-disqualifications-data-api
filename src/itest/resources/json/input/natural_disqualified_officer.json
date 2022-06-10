@@ -1,53 +1,53 @@
 {
-  "external_data" : {
-    "person_number" : "2",
-    "date_of_birth" : "2022-04-05T12:51:00.767Z",
-    "etag" : "",
-    "title": "Mr",
-    "forename": "Dust",
-    "middle_name": "Condition Reserve",
-    "surname": "KINDNESSLIQUOR",
-    "honours": "",
-    "nationality": "British",
-    "registered_location": "Britain",
-    "disqualifications" : [
-      {
-        "address": {
-          "premise": "30",
-          "address_line_1": "Lucy Road",
-          "address_line_2": "Skewen",
-          "locality": "Neath",
-          "region": "",
-          "country": "Wales",
-          "postal_code": "SA10 6RR"
-        },
-        "case_identifier" : "INV3975227",
-        "company_names": [
-          "CONSORTIUM TECHNOLOGY LIMITED"
-        ],
-        "court_name" : "Insolvency Service",
-        "disqualification_type" : "UNDERTAKING",
-        "disqualified_from" : "2022-04-05T12:51:00.767Z",
-        "disqualified_until" : "2022-04-05T12:51:00.767Z",
-        "heard_on" : "2022-04-05T12:51:00.767Z",
-        "undertaken_on" : "2022-04-05T12:51:00.767Z",
-        "reason" : {
-          "description_identifier" : "string",
-          "section" : "CDDA 1987",
-          "act" : "7",
-          "article" : "string"
+    "external_data" : {
+      "person_number" : "2",
+      "date_of_birth" : "2022-04-05T12:51:00.767Z",
+      "etag" : "",
+      "title": "Mr",
+      "forename": "Dust",
+      "middle_name": "Condition Reserve",
+      "surname": "KINDNESSLIQUOR",
+      "honours": "",
+      "nationality": "British",
+      "registered_location": "Britain",
+      "disqualifications" : [
+        {
+          "address": {
+            "premise": "30",
+            "address_line_1": "Lucy Road",
+            "address_line_2": "Skewen",
+            "locality": "Neath",
+            "region": "",
+            "country": "Wales",
+            "postal_code": "SA10 6RR"
+          },
+          "case_identifier" : "INV3975227",
+          "company_names": [
+            "CONSORTIUM TECHNOLOGY LIMITED"
+          ],
+          "court_name" : "Insolvency Service",
+          "disqualification_type" : "UNDERTAKING",
+          "disqualified_from" : "2022-04-05T12:51:00.767Z",
+          "disqualified_until" : "2022-04-05T12:51:00.767Z",
+          "heard_on" : "2022-04-05T12:51:00.767Z",
+          "undertaken_on" : "2022-04-05T12:51:00.767Z",
+          "reason" : {
+            "description_identifier" : "string",
+            "section" : "CDDA 1987",
+            "act" : "7",
+            "article" : "string"
+          }
         }
+      ],
+      "links" : {
+        "self" : "link"
       }
-    ],
-    "links" : {
-      "self" : "link"
+    },
+    "internal_data" : {
+      "delta_at" : "2030-04-05T15:51:00.768Z",
+      "officer_id" : "1234567890",
+      "officer_id_raw" : "1234567890",
+      "officer_disq_id" : "1234567890",
+      "officer_detail_id" : "1234567890"
     }
-  },
-  "internal_data" : {
-    "delta_at" : "2022-04-05T15:51:00.768Z",
-    "officer_id" : "1234567890",
-    "officer_id_raw" : "1234567890",
-    "officer_disq_id" : "1234567890",
-    "officer_detail_id" : "1234567890"
   }
-}

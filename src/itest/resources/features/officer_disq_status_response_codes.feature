@@ -24,11 +24,13 @@ Scenario: Processing disqualified officers information unsuccessfully after inte
     When CHS kafka API service is unavailable
     And I send natural PUT request with payload "<data>" file
     Then I should receive 503 status code
-    And the CHS Kafka API is invoked successfully with "<officerId>"
+    And I send natural GET request with officer Id "<officerId>"
+    And the natural Get call response body should match "<result>" file
+    And the CHS Kafka API is invoked with "<officerId>"
 
     Examples:
-        | data                         | officerId  |
-        | natural_disqualified_officer | 1234567890 |
+        | data                         | officerId  | result                                |
+        | natural_disqualified_officer | 1234567890 | retrieve_natural_disqualified_officer |
 
   Scenario: Processing disqualified officers information while database is down
 

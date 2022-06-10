@@ -83,7 +83,7 @@ public class DisqualificationSteps {
         verify(disqualifiedApiService, times(0)).invokeChsKafkaApi(any(ResourceChangedRequest.class));
     }
 
-    @Then("the CHS Kafka API is invoked successfully with {string}")
+    @Then("the CHS Kafka API is invoked with {string}")
     public void chs_kafka_api_invoked(String officerId) {
         boolean isDelete = officerId.equals("id_to_delete") ? true : false;
 
@@ -107,7 +107,7 @@ public class DisqualificationSteps {
         int expectedStatusCode = CucumberContext.CONTEXT.get("statusCode");
         Assertions.assertThat(expectedStatusCode).isEqualTo(statusCode);
     }
-    
+
     @Then("the disqualified officer with officer id {string} still exists in the database")
     public void disqualified_officer_exists(String officerId) {
         Assertions.assertThat(repository.existsById(officerId));
