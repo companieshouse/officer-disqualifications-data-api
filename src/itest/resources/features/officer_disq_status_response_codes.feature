@@ -39,3 +39,8 @@ Scenario: Processing disqualified officers information unsuccessfully after inte
     When I send natural PUT request with payload "natural_disqualified_officer" file
     Then I should receive 503 status code
     And the CHS Kafka API is not invoked
+
+  Scenario: Proccessing disqualified officers information without ERIC headers
+    Given disqualified officers data api service is running
+    When I send natural PUT request without ERIC headers
+    Then I should receive 403 status code

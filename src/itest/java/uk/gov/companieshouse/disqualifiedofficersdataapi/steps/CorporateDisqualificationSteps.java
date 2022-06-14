@@ -79,7 +79,13 @@ public class CorporateDisqualificationSteps {
     @When("I send corporate GET request with officer Id {string}")
     public void i_send_corporate_get_request_with_officer_id(String officerId) throws IOException {
         String uri = "/disqualified-officers/corporate/{officerId}";
-        ResponseEntity<CorporateDisqualificationApi> response = restTemplate.exchange(uri, HttpMethod.GET, null,
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("ERIC-Identity", "TEST-IDENTITY");
+        headers.set("ERIC-Identity-Type", "KEY");
+        HttpEntity<String> request = new HttpEntity<String>(null, headers);
+
+        ResponseEntity<CorporateDisqualificationApi> response = restTemplate.exchange(uri, HttpMethod.GET, request,
                 CorporateDisqualificationApi.class, officerId);
 
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
@@ -98,6 +104,8 @@ public class CorporateDisqualificationSteps {
         this.contextId = "5234234234";
         CucumberContext.CONTEXT.set("contextId", this.contextId);
         headers.set("x-request-id", this.contextId);
+        headers.set("ERIC-Identity", "TEST-IDENTITY");
+        headers.set("ERIC-Identity-Type", "KEY");
 
         HttpEntity request = new HttpEntity(data, headers);
         String uri = "/disqualified-officers/corporate/{officerId}/internal";
