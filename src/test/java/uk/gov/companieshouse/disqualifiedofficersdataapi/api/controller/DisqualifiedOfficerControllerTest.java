@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +21,7 @@ import uk.gov.companieshouse.api.disqualification.InternalDisqualificationApiInt
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.ExceptionHandlerConfig;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.config.WebSecurityConfig;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.controller.DisqualifiedOfficerController;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
@@ -39,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = DisqualifiedOfficerController.class)
 @ContextConfiguration(classes = {DisqualifiedOfficerController.class, ExceptionHandlerConfig.class})
+@Import({WebSecurityConfig.class})
 class DisqualifiedOfficerControllerTest {
     private static final String OFFICER_ID = "02588581";
     private static final String NATURAL = "natural";
@@ -78,6 +81,8 @@ class DisqualifiedOfficerControllerTest {
         mockMvc.perform(put(NATURAL_URL)
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key")
                         .content(gson.toJson(request)))
                 .andExpect(status().isOk());
     }
@@ -96,6 +101,8 @@ class DisqualifiedOfficerControllerTest {
         mockMvc.perform(put(NATURAL_URL)
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key")
                         .content(gson.toJson(request)))
                 .andExpect(status().isNotFound());
     }
@@ -114,6 +121,8 @@ class DisqualifiedOfficerControllerTest {
         mockMvc.perform(put(NATURAL_URL)
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key")
                         .content(gson.toJson(request)))
                 .andExpect(status().isBadRequest());
     }
@@ -132,6 +141,8 @@ class DisqualifiedOfficerControllerTest {
         mockMvc.perform(put(NATURAL_URL)
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key")
                         .content(gson.toJson(request)))
                 .andExpect(status().isMethodNotAllowed());
     }
@@ -150,6 +161,8 @@ class DisqualifiedOfficerControllerTest {
         mockMvc.perform(put(NATURAL_URL)
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key")
                         .content(gson.toJson(request)))
                 .andExpect(status().isInternalServerError());
     }
@@ -168,8 +181,27 @@ class DisqualifiedOfficerControllerTest {
         mockMvc.perform(put(NATURAL_URL)
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key")
                         .content(gson.toJson(request)))
                 .andExpect(status().isServiceUnavailable());
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer PUT request - Forbidden status code 403")
+    public void callDisqualifiedOfficerPutRequestForbidden() throws Exception {
+        InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
+        request.setInternalData(new InternalDisqualificationApiInternalData());
+        request.setExternalData(new NaturalDisqualificationApi());
+
+        doNothing().when(disqualifiedOfficerService).processNaturalDisqualification(anyString(), anyString(),
+                isA(InternalNaturalDisqualificationApi.class));
+
+        mockMvc.perform(put(NATURAL_URL)
+                .contentType(APPLICATION_JSON)
+                .header("x-request-id", "5342342")
+                .content(gson.toJson(request)))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -181,7 +213,9 @@ class DisqualifiedOfficerControllerTest {
 
         mockMvc.perform(delete(DELETE_URL)
                         .contentType(APPLICATION_JSON)
-                        .header("x-request-id", "5342342"))
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key"))
                 .andExpect(status().isOk());
     }
 
@@ -194,7 +228,9 @@ class DisqualifiedOfficerControllerTest {
 
         mockMvc.perform(delete(DELETE_URL)
                         .contentType(APPLICATION_JSON)
-                        .header("x-request-id", "5342342"))
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key"))
                 .andExpect(status().isServiceUnavailable());
     }
 }
