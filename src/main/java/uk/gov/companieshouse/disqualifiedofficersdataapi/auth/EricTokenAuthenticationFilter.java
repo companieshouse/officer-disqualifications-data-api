@@ -22,18 +22,18 @@ public class EricTokenAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String ericIdentity = request.getHeader("ERIC-Identity");
+        String ericId = request.getHeader("ERIC-Identity");
 
-        if (StringUtils.isBlank(ericIdentity)) {
+        if (StringUtils.isBlank(ericId)) {
             logger.error("Unauthorised request received without eric identity");
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
-        String ericId = request.getHeader("ERIC-Identity-Type");
+        String ericIdType = request.getHeader("ERIC-Identity-Type");
 
-        if (StringUtils.isBlank(ericId) ||
-                ! (ericId.equalsIgnoreCase("key") || ericId.equalsIgnoreCase("oauth2"))) {
+        if (StringUtils.isBlank(ericIdType) ||
+                ! (ericIdType.equalsIgnoreCase("key") || ericIdType.equalsIgnoreCase("oauth2"))) {
             logger.error("Unauthorised request received without eric identity type");
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
