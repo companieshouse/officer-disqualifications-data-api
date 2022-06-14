@@ -79,7 +79,13 @@ public class NaturalDisqualificationSteps {
     @When("I send natural GET request with officer Id {string}")
     public void i_send_natural_get_request_with_officer_id(String officerId) throws IOException {
         String uri = "/disqualified-officers/natural/{officerId}";
-        ResponseEntity<NaturalDisqualificationApi> response = restTemplate.exchange(uri, HttpMethod.GET, null,
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("ERIC-Identity", "TEST-IDENTITY");
+        headers.set("ERIC-Identity-Type", "KEY");
+        HttpEntity<String> request = new HttpEntity<String>(null, headers);
+
+        ResponseEntity<NaturalDisqualificationApi> response = restTemplate.exchange(uri, HttpMethod.GET, request,
                 NaturalDisqualificationApi.class, officerId);
 
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
@@ -90,6 +96,29 @@ public class NaturalDisqualificationSteps {
     @When("I send natural PUT request with payload {string} file")
     public void i_send_natural_put_request_with_payload(String dataFile) throws IOException {
         String data = FileReaderUtil.readFile("src/itest/resources/json/input/" + dataFile + ".json");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        this.contextId = "5234234234";
+        CucumberContext.CONTEXT.set("contextId", this.contextId);
+        headers.set("x-request-id", this.contextId);
+        headers.set("ERIC-Identity", "TEST-IDENTITY");
+        headers.set("ERIC-Identity-Type", "KEY");
+
+        HttpEntity<String> request = new HttpEntity<String>(data, headers);
+        String uri = "/disqualified-officers/natural/{officerId}/internal";
+        CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.NATURAL);
+        String officerId = "1234567890";
+        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, officerId);
+
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
+    }
+
+    @When("I send natural PUT request without ERIC headers")
+    public void i_send_natural_put_request_without_ERIC_headers() throws IOException {
+        String data = FileReaderUtil.readFile("src/itest/resources/json/input/natural_disqualified_officer.json");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

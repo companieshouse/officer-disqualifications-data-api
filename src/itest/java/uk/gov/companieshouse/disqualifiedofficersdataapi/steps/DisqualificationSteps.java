@@ -65,6 +65,8 @@ public class DisqualificationSteps {
         this.officerId = officerId;
         CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.NATURAL);
         headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
+        headers.set("ERIC-Identity", "TEST-IDENTITY");
+        headers.set("ERIC-Identity-Type", "KEY");
 
         HttpEntity<String> request = new HttpEntity<String>(null, headers);
 
