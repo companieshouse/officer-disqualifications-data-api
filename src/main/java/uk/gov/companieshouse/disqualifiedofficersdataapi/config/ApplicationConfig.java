@@ -11,12 +11,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
+import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.PermissionToAct;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedCorporateOfficerReadConverter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedCorporateOfficerWriteConverter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedNaturalOfficerReadConverter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.converter.DisqualifiedNaturalOfficerWriteConverter;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationApiMixIn;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.PermissionToActMixIn;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.serialization.LocalDateDeSerializer;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.serialization.LocalDateSerializer;
 
@@ -63,6 +68,9 @@ public class ApplicationConfig {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.addMixIn(NaturalDisqualificationApi.class, DisqualificationApiMixIn.class);
+        objectMapper.addMixIn(CorporateDisqualificationApi.class, DisqualificationApiMixIn.class);
+        objectMapper.addMixIn(PermissionToAct.class, PermissionToActMixIn.class);
         SimpleModule module = new SimpleModule();
         module.addSerializer(LocalDate.class, new LocalDateSerializer());
         module.addDeserializer(LocalDate.class, new LocalDateDeSerializer());

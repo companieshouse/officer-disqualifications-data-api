@@ -16,7 +16,6 @@ import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
-import uk.gov.companieshouse.api.disqualification.PermissionToAct;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DisqualifiedOfficerService;
 
@@ -91,13 +90,6 @@ public class DisqualifiedOfficerController {
                 officerId));
 
         NaturalDisqualificationDocument disqualification = service.retrieveNaturalDisqualification(officerId);
-        NaturalDisqualificationApi data = disqualification.getData();
-        if (data.getPermissionsToAct() != null) {
-            for (PermissionToAct permissionToAct : data.getPermissionsToAct()) {
-                permissionToAct.setPurpose(null);
-            }
-        }
-        data.setPersonNumber(null);
 
         return ResponseEntity.status(HttpStatus.OK).body(disqualification.getData());
     }
@@ -117,13 +109,6 @@ public class DisqualifiedOfficerController {
 
         CorporateDisqualificationDocument disqualification = service.retrieveCorporateDisqualification(
                 officerId);
-        CorporateDisqualificationApi data = disqualification.getData();
-        if (data.getPermissionsToAct() != null) {
-            for (PermissionToAct permissionToAct : data.getPermissionsToAct()) {
-                permissionToAct.setPurpose(null);
-            }
-        }
-        data.setPersonNumber(null);
 
         return ResponseEntity.status(HttpStatus.OK).body(disqualification.getData());
     }
