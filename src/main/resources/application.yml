@@ -20,6 +20,8 @@ spring:
     mongodb:
       uri: ${MONGODB_URL:mongodb://mongo:27017}/disqualifications?retryWrites=false
       name: disqualifications
+  jackson:
+    default-property-inclusion: NON_NULL
 
 mongodb:
   disqualifications:
