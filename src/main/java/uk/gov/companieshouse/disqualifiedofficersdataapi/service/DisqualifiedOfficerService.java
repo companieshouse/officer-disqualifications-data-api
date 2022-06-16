@@ -14,6 +14,8 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationD
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.NaturalDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.transform.DisqualificationTransformer;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,6 +24,9 @@ import java.util.Optional;
 
 @Service
 public class DisqualifiedOfficerService {
+
+    public static final String APPLICATION_NAME_SPACE = "disqualified-officers-data-api";
+    private static final Logger logger = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     @Autowired
     private DisqualifiedOfficerRepository repository;
@@ -34,6 +39,7 @@ public class DisqualifiedOfficerService {
 
     @Autowired
     private DisqualificationTransformer transformer;
+
     @Autowired
     DisqualifiedOfficerApiService disqualifiedOfficerApiService;
 
@@ -56,6 +62,8 @@ public class DisqualifiedOfficerService {
             DisqualificationDocument document = transformer.transformNaturalDisqualifiedOfficer(officerId, requestBody);
 
             saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL);
+        } else {
+            logger.info("Disqualification not persisted as the record provided is not the latest record.");
         }
     }
 
@@ -75,6 +83,8 @@ public class DisqualifiedOfficerService {
             DisqualificationDocument document = transformer.transformCorporateDisqualifiedOfficer(officerId, requestBody);
 
             saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE);
+        } else {
+            logger.info("Disqualification not persisted as the record provided is not the latest record.");
         }
     }
 
@@ -100,9 +110,16 @@ public class DisqualifiedOfficerService {
     private void deleteCorporateDisqualification(String contextId, String officerId) {
         CorporateDisqualificationDocument document = retrieveCorporateDisqualification(officerId);
         repository.delete(document);
+        logger.info(String.format("Corporate disqualification is deleted in MongoDb officer id: %s",
+            contextId,
+            officerId));
+
         disqualifiedOfficerApiService.invokeChsKafkaApi(
                 new ResourceChangedRequest(contextId, officerId, 
                         DisqualificationResourceType.CORPORATE, document.getData(), true));
+        logger.info(String.format("ChsKafka api DELETED invoked updated successfully for context id: %s and officer id: %s",
+            contextId,
+            officerId));
     }
 
     /**
@@ -113,9 +130,16 @@ public class DisqualifiedOfficerService {
     private void deleteNaturalDisqualification(String contextId, String officerId) {
         NaturalDisqualificationDocument document = retrieveNaturalDisqualification(officerId);
         repository.delete(document);
+        logger.info(String.format("Natural disqualification is deleted in MongoDb for context id: %s and officer id: %s",
+            contextId,
+            officerId));
+
         disqualifiedOfficerApiService.invokeChsKafkaApi(
                 new ResourceChangedRequest(contextId, officerId, 
                         DisqualificationResourceType.NATURAL, document.getData(), true));
+        logger.info(String.format("ChsKafka api DELETED invoked updated successfully for context id: %s and officer id: %s",
+            contextId,
+            officerId));
     }
 
     /**
@@ -150,14 +174,20 @@ public class DisqualifiedOfficerService {
         try {
             repository.save(document);
             savedToDb = true;
+            logger.info(String.format("Disqualification is updated in MongoDb for context id: %s and officer id: %s",
+                contextId,
+                officerId));
         } catch (IllegalArgumentException illegalArgumentEx) {
             throw new BadRequestException(illegalArgumentEx.getMessage());
         }
-        
+
         if (savedToDb) {
             disqualifiedOfficerApiService.invokeChsKafkaApi(
                     new ResourceChangedRequest(contextId, officerId, 
                             type, null, false));
+            logger.info(String.format("ChsKafka api CHANGED invoked updated successfully for context id: %s and officer id: %s",
+                contextId,
+                officerId));
         }
     }
 
