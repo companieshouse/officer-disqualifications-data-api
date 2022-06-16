@@ -87,28 +87,36 @@ public class DisqualifiedOfficerApiClientServiceTest {
     }
 
     @Test
-    void should_handle_exception_when_chs_kafka_endpoint_throws_exception() throws ApiErrorResponseException {
+    void should_handle_exception_when_chs_kafka_endpoint_throws_503() throws ApiErrorResponseException {
 
-        when(apiClientService.getInternalApiClient()).thenReturn(internalApiClient);
-        when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
-        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(changedResourcePost);
-        when(changedResourcePost.execute()).thenThrow(RuntimeException.class);
+        setupExceptionScenario(503, "Service Unavailable");
 
+        Assert.assertThrows(ServiceUnavailableException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
 
-        Assert.assertThrows(RuntimeException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi
-                (new ResourceChangedRequest("3245435", "CH4000056",
-                        DisqualificationResourceType.NATURAL, null, false)));
-
-        verify(apiClientService, times(1)).getInternalApiClient();
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(),
-                Mockito.any());
-        verify(changedResourcePost, times(1)).execute();
+        verifyExceptionScenario();
     }
 
-    @ParameterizedTest
-    @MethodSource("provideExceptionParameters")
-    void should_handle_exception_when_chs_kafka_endpoint_throws_appropriate_exception(int statusCode, String statusMessage, Class<Throwable> exception) throws ApiErrorResponseException {
+    @Test
+    void should_handle_exception_when_chs_kafka_endpoint_throws_500() throws ApiErrorResponseException {
+
+        setupExceptionScenario(500, "Internal Service Error");
+
+        Assert.assertThrows(ServiceUnavailableException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
+
+        verifyExceptionScenario();
+    }
+
+    @Test
+    void should_handle_exception_when_chs_kafka_endpoint_throws_error_with_200() throws ApiErrorResponseException {
+
+        setupExceptionScenario(200, "");
+
+        Assert.assertThrows(RuntimeException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
+
+        verifyExceptionScenario();
+    }
+
+    private void setupExceptionScenario(int statusCode, String statusMessage) throws ApiErrorResponseException {
         when(apiClientService.getInternalApiClient()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(changedResourcePost);
@@ -119,21 +127,13 @@ public class DisqualifiedOfficerApiClientServiceTest {
         ApiErrorResponseException apiErrorResponseException =
                 new ApiErrorResponseException(builder);
         when(changedResourcePost.execute()).thenThrow(apiErrorResponseException);
+    }
 
-        Assert.assertThrows(exception, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
-
+    private void verifyExceptionScenario() throws ApiErrorResponseException {
         verify(apiClientService, times(1)).getInternalApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
         verify(privateChangedResourceHandler, times(1)).postChangedResource("/resource-changed",
                 changedResource);
         verify(changedResourcePost, times(1)).execute();
-    }
-
-    private static Stream<Arguments> provideExceptionParameters() {
-        return Stream.of(
-                Arguments.of(503, "Service Unavailable", ServiceUnavailableException.class),
-                Arguments.of(405, "Method Not Allowed", MethodNotAllowedException.class),
-                Arguments.of(500, "Internal Service Error", RuntimeException.class)
-        );
     }
 }
