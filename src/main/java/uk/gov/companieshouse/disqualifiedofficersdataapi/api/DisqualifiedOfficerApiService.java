@@ -60,11 +60,8 @@ public class DisqualifiedOfficerApiService {
             return changedResourcePost.execute();
         } catch (ApiErrorResponseException exp) {
             HttpStatus statusCode = HttpStatus.valueOf(exp.getStatusCode());
-            if (!statusCode.is2xxSuccessful() && statusCode != HttpStatus.SERVICE_UNAVAILABLE) {
+            if (!statusCode.is2xxSuccessful()) {
                 logger.error("Unsuccessful call to /resource-changed endpoint", exp);
-                throw new MethodNotAllowedException(exp.getMessage());
-            } else if (statusCode == HttpStatus.SERVICE_UNAVAILABLE) {
-                logger.error("Service unavailable while calling /resource-changed endpoint", exp);
                 throw new ServiceUnavailableException(exp.getMessage());
             } else {
                 logger.error("Error occurred while calling /resource-changed endpoint", exp);
