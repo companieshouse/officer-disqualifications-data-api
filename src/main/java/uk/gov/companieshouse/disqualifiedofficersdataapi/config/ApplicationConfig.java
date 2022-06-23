@@ -67,7 +67,7 @@ public class ApplicationConfig {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         objectMapper.addMixIn(NaturalDisqualificationApi.class, DisqualificationApiMixIn.class);
         objectMapper.addMixIn(CorporateDisqualificationApi.class, DisqualificationApiMixIn.class);
         objectMapper.addMixIn(PermissionToAct.class, PermissionToActMixIn.class);
