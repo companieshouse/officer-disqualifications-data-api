@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -217,6 +218,7 @@ public class DisqualifiedOfficerServiceTest {
         verify(repository).delete(doc);
         verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
                 DisqualificationResourceType.NATURAL, doc.getData(), true));
+        assertEquals(doc.getData().getKind().toString(), "natural-disqualification");
     }
 
     @Test
@@ -233,6 +235,7 @@ public class DisqualifiedOfficerServiceTest {
         verify(repository).delete(doc);
         verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
                 DisqualificationResourceType.CORPORATE, doc.getData(), true));
+        assertEquals(doc.getData().getKind().toString(), "corporate-disqualification");
     }
 
     @Test
