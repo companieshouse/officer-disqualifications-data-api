@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
@@ -113,7 +114,7 @@ public class DisqualifiedOfficerService {
         logger.info(String.format("Corporate disqualification is deleted in MongoDb officer id: %s",
             contextId,
             officerId));
-
+        document.getData().setKind(KindEnum.CORPORATE_DISQUALIFICATION);
         disqualifiedOfficerApiService.invokeChsKafkaApi(
                 new ResourceChangedRequest(contextId, officerId, 
                         DisqualificationResourceType.CORPORATE, document.getData(), true));
@@ -133,7 +134,8 @@ public class DisqualifiedOfficerService {
         logger.info(String.format("Natural disqualification is deleted in MongoDb for context id: %s and officer id: %s",
             contextId,
             officerId));
-
+        document.getData().setKind(uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi.
+                KindEnum.NATURAL_DISQUALIFICATION);
         disqualifiedOfficerApiService.invokeChsKafkaApi(
                 new ResourceChangedRequest(contextId, officerId, 
                         DisqualificationResourceType.NATURAL, document.getData(), true));

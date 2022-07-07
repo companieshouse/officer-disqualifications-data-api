@@ -209,6 +209,7 @@ public class DisqualifiedOfficerServiceTest {
     public void deleteNaturalDisqualificationDeletesDisqualification() {
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         NaturalDisqualificationDocument doc = new NaturalDisqualificationDocument();
+        doc.setData(new NaturalDisqualificationApi());
         when(naturalRepository.findById(OFFICER_ID)).thenReturn(Optional.of(doc));
 
         service.deleteDisqualification("", OFFICER_ID);
@@ -224,6 +225,7 @@ public class DisqualifiedOfficerServiceTest {
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         CorporateDisqualificationDocument doc = new CorporateDisqualificationDocument();
         doc.setCorporateOfficer(true);
+        doc.setData(new CorporateDisqualificationApi());
         when(corporateRepository.findById(OFFICER_ID)).thenReturn(Optional.of(doc));
 
         service.deleteDisqualification("", OFFICER_ID);

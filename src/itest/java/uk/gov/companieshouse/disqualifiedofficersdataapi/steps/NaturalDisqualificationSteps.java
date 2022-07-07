@@ -75,6 +75,7 @@ public class NaturalDisqualificationSteps {
         naturalDisqualification.setId(officerId);
 
         mongoTemplate.save(naturalDisqualification);
+        natData.setKind(KindEnum.NATURAL_DISQUALIFICATION);
         CucumberContext.CONTEXT.set("disqualificationData", natData);
     }
 
