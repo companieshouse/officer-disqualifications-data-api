@@ -128,6 +128,7 @@ public class CorporateDisqualificationSteps {
 
         assertThat(expected.getName()).isEqualTo(actual.getName());
         assertThat(expected.getDisqualifications()).isEqualTo(actual.getDisqualifications());
+        assertThat(expected.getKind()).isEqualTo(actual.getKind());
     }
 
     @After
