@@ -16,7 +16,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.*;
+
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.CucumberContext;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
@@ -141,12 +143,14 @@ public class NaturalDisqualificationSteps {
     public void the_natural_get_call_response_body_should_match(String dataFile) throws IOException {
         File file = new ClassPathResource("/json/output/" + dataFile + ".json").getFile();
         NaturalDisqualificationApi expected = objectMapper.readValue(file, NaturalDisqualificationApi.class);
+        expected.setKind(KindEnum.NATURAL_DISQUALIFICATION);
 
         NaturalDisqualificationApi actual = CucumberContext.CONTEXT.get("getResponseBody");
 
         assertThat(expected.getSurname()).isEqualTo(actual.getSurname());
         assertThat(expected.getDisqualifications()).isEqualTo(actual.getDisqualifications());
         assertThat(expected.getDateOfBirth()).isEqualTo(actual.getDateOfBirth());
+        assertThat(expected.getKind()).isEqualTo(actual.getKind());
     }
 
     @After

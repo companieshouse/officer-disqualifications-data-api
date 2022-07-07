@@ -16,6 +16,7 @@ import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DisqualifiedOfficerService;
 
@@ -90,6 +91,8 @@ public class DisqualifiedOfficerController {
                 officerId));
 
         NaturalDisqualificationDocument disqualification = service.retrieveNaturalDisqualification(officerId);
+        disqualification.getData().setKind(uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi
+                        .KindEnum.NATURAL_DISQUALIFICATION);
 
         return ResponseEntity.status(HttpStatus.OK).body(disqualification.getData());
     }
@@ -109,6 +112,7 @@ public class DisqualifiedOfficerController {
 
         CorporateDisqualificationDocument disqualification = service.retrieveCorporateDisqualification(
                 officerId);
+        disqualification.getData().setKind(KindEnum.CORPORATE_DISQUALIFICATION);
 
         return ResponseEntity.status(HttpStatus.OK).body(disqualification.getData());
     }
