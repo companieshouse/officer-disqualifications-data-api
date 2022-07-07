@@ -12,6 +12,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.*;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.CucumberContext;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
@@ -121,11 +122,13 @@ public class CorporateDisqualificationSteps {
     public void the_corporate_get_call_response_body_should_match(String dataFile) throws IOException {
        File file = new ClassPathResource("/json/output/" + dataFile + ".json").getFile();
        CorporateDisqualificationApi expected = objectMapper.readValue(file, CorporateDisqualificationApi.class);
+       expected.setKind(KindEnum.CORPORATE_DISQUALIFICATION);
 
         CorporateDisqualificationApi actual = CucumberContext.CONTEXT.get("getResponseBody");
 
         assertThat(expected.getName()).isEqualTo(actual.getName());
         assertThat(expected.getDisqualifications()).isEqualTo(actual.getDisqualifications());
+        assertThat(expected.getKind()).isEqualTo(actual.getKind());
     }
 
     @After
