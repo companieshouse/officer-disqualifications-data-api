@@ -17,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.companieshouse.api.disqualification.InternalDisqualificationApiInternalData;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
@@ -26,15 +27,19 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.controller.Disqualified
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DisqualifiedOfficerService;
 import uk.gov.companieshouse.logging.Logger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -47,6 +52,7 @@ class DisqualifiedOfficerControllerTest {
     private static final String NATURAL = "natural";
     private static final String DELETE = "delete";
     private static final String NATURAL_URL = String.format("/disqualified-officers/%s/%s/internal", NATURAL, OFFICER_ID);
+    private static final String NATURAL_GET_URL = String.format("/disqualified-officers/%s/%s", NATURAL, OFFICER_ID);
     private static final String DELETE_URL = String.format("/disqualified-officers/%s/%s/internal", DELETE, OFFICER_ID);
 
     @Autowired
@@ -57,6 +63,9 @@ class DisqualifiedOfficerControllerTest {
 
     @MockBean
     private DisqualifiedOfficerService disqualifiedOfficerService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -83,9 +92,89 @@ class DisqualifiedOfficerControllerTest {
                         .header("x-request-id", "5342342")
                         .header("ERIC-Identity", "Test-Identity")
                         .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
                         .content(gson.toJson(request)))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("Disqualified Officer PUT request fails with missing ERIC-Authorised-Key-Privileges")
+    void callDisqualifiedOfficerPutRequestMissingAuthorisation() throws Exception {
+        InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
+        request.setInternalData(new InternalDisqualificationApiInternalData());
+        request.setExternalData(new NaturalDisqualificationApi());
+
+        doNothing().when(disqualifiedOfficerService).processNaturalDisqualification(anyString(), anyString(),
+                isA(InternalNaturalDisqualificationApi.class));
+
+        mockMvc.perform(put(NATURAL_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity" , "SOME_IDENTITY")
+                        .header("ERIC-Identity-Type", "key")
+                        .content(gson.toJson(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer PUT request fails with wrong privileges")
+    void callDisqualifiedOfficerPutRequestWrongPrivileges() throws Exception {
+        InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
+        request.setInternalData(new InternalDisqualificationApiInternalData());
+        request.setExternalData(new NaturalDisqualificationApi());
+
+        doNothing().when(disqualifiedOfficerService).processNaturalDisqualification(anyString(), anyString(),
+                isA(InternalNaturalDisqualificationApi.class));
+
+        mockMvc.perform(put(NATURAL_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity" , "SOME_IDENTITY")
+                        .header("ERIC-Identity-Type", "key")
+                        .header("ERIC-Authorised-Key-Privileges", "privilege")
+                        .content(gson.toJson(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer PUT request fails with oauth2 authorisation")
+    void callDisqualifiedOfficerPutRequestWrongAuthorisation() throws Exception {
+        InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
+        request.setInternalData(new InternalDisqualificationApiInternalData());
+        request.setExternalData(new NaturalDisqualificationApi());
+
+        doNothing().when(disqualifiedOfficerService).processNaturalDisqualification(anyString(), anyString(),
+                isA(InternalNaturalDisqualificationApi.class));
+
+        mockMvc.perform(put(NATURAL_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity" , "SOME_IDENTITY")
+                        .header("ERIC-Identity-Type", "oauth2")
+                        .content(gson.toJson(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer PUT request fails with oauth2 authorisation and internal app privileges")
+    void callDisqualifiedOfficerPutRequestWrongAuthorisationWithPrivileges() throws Exception {
+        InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
+        request.setInternalData(new InternalDisqualificationApiInternalData());
+        request.setExternalData(new NaturalDisqualificationApi());
+
+        doNothing().when(disqualifiedOfficerService).processNaturalDisqualification(anyString(), anyString(),
+                isA(InternalNaturalDisqualificationApi.class));
+
+        mockMvc.perform(put(NATURAL_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity" , "SOME_IDENTITY")
+                        .header("ERIC-Identity-Type", "oauth2")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                        .content(gson.toJson(request)))
+                .andExpect(status().isForbidden());
+    }
+
 
     @Test
     @DisplayName("Disqualified Officer PUT request - IllegalArgumentException status code 404 not found")
@@ -103,6 +192,7 @@ class DisqualifiedOfficerControllerTest {
                         .header("x-request-id", "5342342")
                         .header("ERIC-Identity", "Test-Identity")
                         .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
                         .content(gson.toJson(request)))
                 .andExpect(status().isNotFound());
     }
@@ -123,6 +213,7 @@ class DisqualifiedOfficerControllerTest {
                         .header("x-request-id", "5342342")
                         .header("ERIC-Identity", "Test-Identity")
                         .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
                         .content(gson.toJson(request)))
                 .andExpect(status().isBadRequest());
     }
@@ -143,6 +234,7 @@ class DisqualifiedOfficerControllerTest {
                         .header("x-request-id", "5342342")
                         .header("ERIC-Identity", "Test-Identity")
                         .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
                         .content(gson.toJson(request)))
                 .andExpect(status().isMethodNotAllowed());
     }
@@ -163,6 +255,7 @@ class DisqualifiedOfficerControllerTest {
                         .header("x-request-id", "5342342")
                         .header("ERIC-Identity", "Test-Identity")
                         .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
                         .content(gson.toJson(request)))
                 .andExpect(status().isInternalServerError());
     }
@@ -183,6 +276,7 @@ class DisqualifiedOfficerControllerTest {
                         .header("x-request-id", "5342342")
                         .header("ERIC-Identity", "Test-Identity")
                         .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
                         .content(gson.toJson(request)))
                 .andExpect(status().isServiceUnavailable());
     }
@@ -201,7 +295,7 @@ class DisqualifiedOfficerControllerTest {
                 .contentType(APPLICATION_JSON)
                 .header("x-request-id", "5342342")
                 .content(gson.toJson(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -215,7 +309,8 @@ class DisqualifiedOfficerControllerTest {
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", "5342342")
                         .header("ERIC-Identity", "Test-Identity")
-                        .header("ERIC-Identity-Type", "Key"))
+                        .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app"))
                 .andExpect(status().isOk());
     }
 
@@ -230,7 +325,61 @@ class DisqualifiedOfficerControllerTest {
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", "5342342")
                         .header("ERIC-Identity", "Test-Identity")
-                        .header("ERIC-Identity-Type", "Key"))
+                        .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app"))
                 .andExpect(status().isServiceUnavailable());
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer GET request")
+    void callDisqualifiedOfficerGetRequest() throws Exception {
+        NaturalDisqualificationDocument naturalDisqualification = new NaturalDisqualificationDocument();
+        NaturalDisqualificationApi data = new NaturalDisqualificationApi();
+        naturalDisqualification.setData(data);
+
+        doReturn(naturalDisqualification)
+                .when(disqualifiedOfficerService).retrieveNaturalDisqualification(anyString());
+
+        MvcResult result= mockMvc.perform(get(NATURAL_GET_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity" , "SOME_IDENTITY")
+                        .header("ERIC-Identity-Type", "key"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertEquals(data, objectMapper.readValue(result.getResponse().getContentAsString(), NaturalDisqualificationApi.class));
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer GET request with oauth2 success")
+    void callDisqualifiedOfficerGetRequestOauth2() throws Exception {
+        NaturalDisqualificationDocument naturalDisqualification = new NaturalDisqualificationDocument();
+        NaturalDisqualificationApi data = new NaturalDisqualificationApi();
+        naturalDisqualification.setData(data);
+
+        doReturn(naturalDisqualification)
+                .when(disqualifiedOfficerService).retrieveNaturalDisqualification(anyString());
+
+        mockMvc.perform(get(NATURAL_GET_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity" , "SOME_IDENTITY")
+                        .header("ERIC-Identity-Type", "oauth2"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("DisqualifiedOfficer GET request - DocumentNotFoundException status code 404 resource not found")
+    void callDisqualifiedOfficerGetRequestDocumentnotFound() throws Exception {
+        doThrow(new IllegalArgumentException("Document not found"))
+                .when(disqualifiedOfficerService).retrieveNaturalDisqualification(anyString());
+
+        mockMvc.perform(get(NATURAL_GET_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity" , "SOME_IDENTITY")
+                        .header("ERIC-Identity-Type", "key"))
+                .andExpect(status().isNotFound());
     }
 }

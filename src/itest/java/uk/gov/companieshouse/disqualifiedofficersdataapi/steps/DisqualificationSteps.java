@@ -21,10 +21,12 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationD
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doThrow;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 import static uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
 public class DisqualificationSteps {
@@ -67,6 +69,7 @@ public class DisqualificationSteps {
         headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
         headers.set("ERIC-Identity", "TEST-IDENTITY");
         headers.set("ERIC-Identity-Type", "KEY");
+        headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
 
         HttpEntity<String> request = new HttpEntity<String>(null, headers);
 

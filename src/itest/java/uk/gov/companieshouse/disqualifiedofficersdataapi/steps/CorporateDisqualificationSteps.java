@@ -107,6 +107,7 @@ public class CorporateDisqualificationSteps {
         headers.set("x-request-id", this.contextId);
         headers.set("ERIC-Identity", "TEST-IDENTITY");
         headers.set("ERIC-Identity-Type", "KEY");
+        headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
 
         HttpEntity request = new HttpEntity(data, headers);
         String uri = "/disqualified-officers/corporate/{officerId}/internal";

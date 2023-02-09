@@ -43,4 +43,4 @@ Scenario: Processing disqualified officers information unsuccessfully after inte
   Scenario: Proccessing disqualified officers information without ERIC headers
     Given disqualified officers data api service is running
     When I send natural PUT request without ERIC headers
-    Then I should receive 403 status code
+    Then I should receive 401 status code
