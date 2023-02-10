@@ -109,6 +109,7 @@ public class NaturalDisqualificationSteps {
         headers.set("x-request-id", this.contextId);
         headers.set("ERIC-Identity", "TEST-IDENTITY");
         headers.set("ERIC-Identity-Type", "KEY");
+        headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
 
         HttpEntity<String> request = new HttpEntity<String>(data, headers);
         String uri = "/disqualified-officers/natural/{officerId}/internal";
