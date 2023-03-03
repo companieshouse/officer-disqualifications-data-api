@@ -110,15 +110,17 @@ public class DisqualifiedOfficerService {
      */
     private void deleteCorporateDisqualification(String contextId, String officerId) {
         CorporateDisqualificationDocument document = retrieveCorporateDisqualification(officerId);
-        repository.delete(document);
-        logger.info(String.format("Corporate disqualification is deleted in MongoDb officer id: %s",
-            contextId,
-            officerId));
+
         document.getData().setKind(KindEnum.CORPORATE_DISQUALIFICATION);
         disqualifiedOfficerApiService.invokeChsKafkaApi(
-                new ResourceChangedRequest(contextId, officerId, 
+                new ResourceChangedRequest(contextId, officerId,
                         DisqualificationResourceType.CORPORATE, document.getData(), true));
         logger.info(String.format("ChsKafka api DELETED invoked updated successfully for context id: %s and officer id: %s",
+                contextId,
+                officerId));
+
+        repository.delete(document);
+        logger.info(String.format("Corporate disqualification is deleted in MongoDb officer id: %s",
             contextId,
             officerId));
     }
@@ -130,16 +132,18 @@ public class DisqualifiedOfficerService {
      */
     private void deleteNaturalDisqualification(String contextId, String officerId) {
         NaturalDisqualificationDocument document = retrieveNaturalDisqualification(officerId);
-        repository.delete(document);
-        logger.info(String.format("Natural disqualification is deleted in MongoDb for context id: %s and officer id: %s",
-            contextId,
-            officerId));
+
         document.getData().setKind(uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi.
                 KindEnum.NATURAL_DISQUALIFICATION);
         disqualifiedOfficerApiService.invokeChsKafkaApi(
-                new ResourceChangedRequest(contextId, officerId, 
+                new ResourceChangedRequest(contextId, officerId,
                         DisqualificationResourceType.NATURAL, document.getData(), true));
         logger.info(String.format("ChsKafka api DELETED invoked updated successfully for context id: %s and officer id: %s",
+                contextId,
+                officerId));
+
+        repository.delete(document);
+        logger.info(String.format("Natural disqualification is deleted in MongoDb for context id: %s and officer id: %s",
             contextId,
             officerId));
     }
@@ -165,7 +169,6 @@ public class DisqualifiedOfficerService {
      */
     private void saveAndCallChsKafka(String contextId, String officerId,
             DisqualificationDocument document, DisqualificationResourceType type) {
-        boolean savedToDb = false;
         Created created = getCreatedFromCurrentRecord(officerId);
         if(created == null) {
             document.setCreated(new Created().setAt(document.getUpdated().getAt()));
@@ -173,24 +176,21 @@ public class DisqualifiedOfficerService {
             document.setCreated(created);
         }
 
-        try {
-            repository.save(document);
-            savedToDb = true;
-            logger.info(String.format("Disqualification is updated in MongoDb for context id: %s and officer id: %s",
+        disqualifiedOfficerApiService.invokeChsKafkaApi(
+                new ResourceChangedRequest(contextId, officerId,
+                        type, null, false));
+        logger.info(String.format("ChsKafka api CHANGED invoked updated successfully for context id: %s and officer id: %s",
                 contextId,
                 officerId));
+
+        try {
+            repository.save(document);
         } catch (IllegalArgumentException illegalArgumentEx) {
             throw new BadRequestException(illegalArgumentEx.getMessage());
         }
-
-        if (savedToDb) {
-            disqualifiedOfficerApiService.invokeChsKafkaApi(
-                    new ResourceChangedRequest(contextId, officerId, 
-                            type, null, false));
-            logger.info(String.format("ChsKafka api CHANGED invoked updated successfully for context id: %s and officer id: %s",
+        logger.info(String.format("Disqualification is updated in MongoDb for context id: %s and officer id: %s",
                 contextId,
                 officerId));
-        }
     }
 
     /**

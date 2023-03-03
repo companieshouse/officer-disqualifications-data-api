@@ -32,5 +32,5 @@ Feature: Delete disqualification information
     And CHS kafka API service is unavailable
     When I send DELETE request with officer id "id_to_delete"
     Then I should receive 503 status code
-    And officer id does not exists for "id_to_delete"
+    And the disqualified officer with officer id "id_to_delete" still exists in the database
 
