@@ -185,12 +185,12 @@ public class DisqualifiedOfficerService {
 
         try {
             repository.save(document);
+            logger.info(String.format("Disqualification is updated in MongoDb for context id: %s and officer id: %s",
+                    contextId,
+                    officerId));
         } catch (IllegalArgumentException illegalArgumentEx) {
             throw new BadRequestException(illegalArgumentEx.getMessage());
         }
-        logger.info(String.format("Disqualification is updated in MongoDb for context id: %s and officer id: %s",
-                contextId,
-                officerId));
     }
 
     /**
