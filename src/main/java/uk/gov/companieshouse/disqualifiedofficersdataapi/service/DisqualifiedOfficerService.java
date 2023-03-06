@@ -120,9 +120,9 @@ public class DisqualifiedOfficerService {
                 officerId));
 
         repository.delete(document);
-        logger.info(String.format("Corporate disqualification is deleted in MongoDb officer id: %s",
-            contextId,
-            officerId));
+        logger.info(String.format("Corporate disqualification is deleted in MongoDb for context id: %s and officer id: %s",
+                contextId,
+                officerId));
     }
 
     /**
@@ -200,17 +200,15 @@ public class DisqualifiedOfficerService {
      */
     private Created getCreatedFromCurrentRecord(String officerId) {
         Optional<DisqualificationDocument> doc = repository.findById(officerId);
-
-        return doc.isPresent() ? doc.get().getCreated(): null;
+        return doc.map(DisqualificationDocument::getCreated).orElse(null);
     }
 
     public DisqualificationDocument retrieveDeleteDisqualification(String officerId) {
         Optional<DisqualificationDocument> disqualificationDocumentOptional = 
                 repository.findById(officerId);
-        DisqualificationDocument disqualificationDocument = disqualificationDocumentOptional.orElseThrow(
+        return disqualificationDocumentOptional.orElseThrow(
                 () -> new IllegalArgumentException(String.format(
-                "Resource not found for officer ID: %s", officerId)));
-        return disqualificationDocument;
+                        "Resource not found for officer ID: %s", officerId)));
     }
 
     public NaturalDisqualificationDocument retrieveNaturalDisqualification(String officerId) {
