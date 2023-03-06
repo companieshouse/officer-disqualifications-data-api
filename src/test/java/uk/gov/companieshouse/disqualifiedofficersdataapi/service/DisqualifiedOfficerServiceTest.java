@@ -20,23 +20,24 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.transform.Disqualificat
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class DisqualifiedOfficerServiceTest {
 
     private static final String OFFICER_ID = "officerId";
+    private static final String PAST_DATE = "20220121133129395348";
+    private static final String FUTURE_DATE = "30220121133129395348";
 
     @Mock
     private DisqualifiedOfficerRepository repository;
@@ -53,16 +54,12 @@ public class DisqualifiedOfficerServiceTest {
     @Mock
     private DisqualifiedOfficerApiService disqualifiedOfficerApiService;
 
-    @Captor
-    private ArgumentCaptor<String> dateCaptor;
-
     @InjectMocks
     private DisqualifiedOfficerService service;
 
     private InternalNaturalDisqualificationApi request;
     private InternalCorporateDisqualificationApi corpRequest;
     private DisqualificationDocument document;
-    private String dateString;
 
     @BeforeEach
     public void setUp() {
@@ -75,14 +72,10 @@ public class DisqualifiedOfficerServiceTest {
         corpRequest.setInternalData(internal);
         document = new DisqualificationDocument();
         document.setUpdated(new Updated().setAt(LocalDateTime.now()));
-        final DateTimeFormatter dateTimeFormatter =
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        dateString = date.format(dateTimeFormatter);
     }
 
     @Test
-    public void processNaturalDisqualificationSavesDisqualification() {
-        when(repository.findUpdatedDisqualification(eq(OFFICER_ID), dateCaptor.capture())).thenReturn(new ArrayList<>());
+    public void processNaturalDisqualificationSavesDisqualificationIfNoExistingDocument() {
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.empty());
         when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
 
@@ -91,14 +84,11 @@ public class DisqualifiedOfficerServiceTest {
         verify(repository).save(document);
         verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
                 DisqualificationResourceType.NATURAL, null, false));
-        assertEquals(dateString, dateCaptor.getValue());
-        assertNotNull(document.getCreated().getAt());
     }
 
     @Test
-    public void processNaturalDisqualificationUpdatesDisqualification() {
-        document.setCreated(new Created().setAt(LocalDateTime.now()));
-        when(repository.findUpdatedDisqualification(eq(OFFICER_ID), dateCaptor.capture())).thenReturn(new ArrayList<>());
+    public void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasEmptyDeltaAt() {
+        document.setDeltaAt("");
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
 
@@ -107,28 +97,36 @@ public class DisqualifiedOfficerServiceTest {
         verify(repository).save(document);
         verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
                 DisqualificationResourceType.NATURAL, null, false));
-        assertEquals(dateString, dateCaptor.getValue());
-        assertNotNull(document.getCreated());
     }
 
     @Test
-    public void processNaturalDisqualificationDoesNotSavesDisqualificationWhenUpdateAlreadyMade() {
-
-        List<DisqualificationDocument> documents = new ArrayList<>();
-        documents.add(new DisqualificationDocument());
-        when(repository.findUpdatedDisqualification(eq(OFFICER_ID), dateCaptor.capture())).thenReturn(documents);
+    public void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAt() {
+        document.setCreated(new Created().setAt(LocalDateTime.now()));
+        document.setDeltaAt(PAST_DATE);
+        when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
 
         service.processNaturalDisqualification("", OFFICER_ID, request);
 
-        verify(repository, times(0)).save(document);
-        verify(disqualifiedOfficerApiService, times(0)).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+        verify(repository).save(document);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
                 DisqualificationResourceType.NATURAL, null, false));
-        assertEquals(dateString, dateCaptor.getValue());
     }
 
     @Test
-    public void processCorporateDisqualificationSavesDisqualification() {
-        when(repository.findUpdatedDisqualification(eq(OFFICER_ID), dateCaptor.capture())).thenReturn(new ArrayList<>());
+    public void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAtAfterNow() {
+        document.setDeltaAt(FUTURE_DATE);
+        when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+
+        service.processNaturalDisqualification("", OFFICER_ID, request);
+
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(transformer);
+        verifyNoInteractions(disqualifiedOfficerApiService);
+    }
+
+    @Test
+    public void processCorporateDisqualificationSavesDisqualificationIfNoExistingDocument() {
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.empty());
         when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
 
@@ -137,8 +135,45 @@ public class DisqualifiedOfficerServiceTest {
         verify(repository).save(document);
         verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
                 DisqualificationResourceType.CORPORATE, null, false));
-        assertEquals(dateString, dateCaptor.getValue());
-        assertNotNull(document.getCreated().getAt());
+    }
+
+    @Test
+    public void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasEmptyDeltaAt() {
+        document.setDeltaAt("");
+        when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
+
+        service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
+
+        verify(repository).save(document);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+                DisqualificationResourceType.CORPORATE, null, false));
+    }
+
+    @Test
+    public void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAt() {
+        document.setCreated(new Created().setAt(LocalDateTime.now()));
+        document.setDeltaAt(PAST_DATE);
+        when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
+
+        service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
+
+        verify(repository).save(document);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+                DisqualificationResourceType.CORPORATE, null, false));
+    }
+
+    @Test
+    public void processCoporateDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAtAfterNow() {
+        document.setDeltaAt(FUTURE_DATE);
+        when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+
+        service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
+
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(transformer);
+        verifyNoInteractions(disqualifiedOfficerApiService);
     }
 
     @Test
