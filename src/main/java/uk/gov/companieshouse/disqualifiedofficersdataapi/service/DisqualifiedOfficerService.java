@@ -147,7 +147,7 @@ public class DisqualifiedOfficerService {
     }
 
     private boolean isLatestRecord(OffsetDateTime deltaAt, Optional<DisqualificationDocument> existingDocument) {
-        // If the document does not exist OR the delta_at in the request is after the new delta_at
+        // If the document does not exist OR the delta_at is blank/null OR the delta_at in the request is after the new delta_at
         return  existingDocument.isEmpty() ||
                 StringUtils.isBlank(existingDocument.get().getDeltaAt()) ||
                 deltaAt.isAfter(ZonedDateTime.parse(existingDocument.get().getDeltaAt(), FORMATTER)
