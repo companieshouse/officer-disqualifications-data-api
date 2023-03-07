@@ -3,15 +3,18 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.disqualification.*;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Updated;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.NaturalDisqualifiedOfficerRepository;
@@ -19,7 +22,6 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.transform.Disqualificat
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

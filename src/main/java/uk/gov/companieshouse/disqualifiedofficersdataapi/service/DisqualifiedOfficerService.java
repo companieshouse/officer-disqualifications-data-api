@@ -61,7 +61,7 @@ public class DisqualifiedOfficerService {
 
         Optional<DisqualificationDocument> existingDocument = repository.findById(officerId);
 
-        // If the document does not exist OR the delta_at in the request is after the new delta_at
+        // If the document does not exist OR the delta_at in the request is after the delta_at being processed
         if (existingDocument.isEmpty() ||
                 StringUtils.isBlank(existingDocument.get().getDeltaAt()) ||
                 isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument.get())) {
