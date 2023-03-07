@@ -58,13 +58,10 @@ public class DisqualifiedOfficerService {
      */
     public void processNaturalDisqualification(String contextId, String officerId,
                                                InternalNaturalDisqualificationApi requestBody) {
-
         Optional<DisqualificationDocument> existingDocument = repository.findById(officerId);
 
         // If the document does not exist OR the delta_at in the request is after the delta_at being processed
-        if (existingDocument.isEmpty() ||
-                StringUtils.isBlank(existingDocument.get().getDeltaAt()) ||
-                isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument.get())) {
+        if (isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument)) {
             DisqualificationDocument document = transformer.transformNaturalDisqualifiedOfficer(officerId, requestBody);
             saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL, existingDocument);
         } else {
@@ -82,10 +79,7 @@ public class DisqualifiedOfficerService {
                                                  InternalCorporateDisqualificationApi requestBody) {
         Optional<DisqualificationDocument> existingDocument = repository.findById(officerId);
 
-        // If the document does not exist OR the delta_at in the request is after the new delta_at
-        if (existingDocument.isEmpty() ||
-                StringUtils.isBlank(existingDocument.get().getDeltaAt()) ||
-                isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument.get())) {
+        if (isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument)) {
             DisqualificationDocument document = transformer.transformCorporateDisqualifiedOfficer(officerId, requestBody);
             saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE, existingDocument);
         } else {
@@ -152,14 +146,11 @@ public class DisqualifiedOfficerService {
             officerId));
     }
 
-    /**
-     * Check the record hasn't been update more recently
-     * @param deltaAt   Time of update
-     * @return isLatestRecord True if we are updating the latest record
-     */
-    private boolean isLatestRecord(OffsetDateTime deltaAt, DisqualificationDocument existingDocument) {
-        // If new delta_at is after existing delta_at then isLatestRecord is true
-        return deltaAt.isAfter(ZonedDateTime.parse(existingDocument.getDeltaAt(), FORMATTER)
+    private boolean isLatestRecord(OffsetDateTime deltaAt, Optional<DisqualificationDocument> existingDocument) {
+        // If the document does not exist OR the delta_at in the request is after the new delta_at
+        return  existingDocument.isEmpty() ||
+                StringUtils.isBlank(existingDocument.get().getDeltaAt()) ||
+                deltaAt.isAfter(ZonedDateTime.parse(existingDocument.get().getDeltaAt(), FORMATTER)
                                             .toOffsetDateTime());
     }
 
