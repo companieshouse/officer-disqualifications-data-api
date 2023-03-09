@@ -1,11 +1,7 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.transform;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalDisqualificationApiInternalData;
@@ -18,7 +14,11 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-public class DisqualificationTransformerTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class DisqualificationTransformerTest {
 
     private static final String OFFICER_ID = "officerId";
     private static final String OFFICER_DISQ_ID = "officerDisqId";
@@ -28,13 +28,13 @@ public class DisqualificationTransformerTest {
 
     private DisqualificationTransformer transformer;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         transformer = new DisqualificationTransformer();
     }
 
     @Test
-    public void shouldTransformNaturalDisqualifiedOfficer() {
+    void shouldTransformNaturalDisqualifiedOfficer() {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
         NaturalDisqualificationApi external = new NaturalDisqualificationApi();
         request.setExternalData(external);
@@ -61,7 +61,7 @@ public class DisqualificationTransformerTest {
     }
 
     @Test
-    public void shouldTransformCorporateDisqualifiedOfficer() {
+    void shouldTransformCorporateDisqualifiedOfficer() {
         InternalCorporateDisqualificationApi request = new InternalCorporateDisqualificationApi();
         CorporateDisqualificationApi external = new CorporateDisqualificationApi();
         request.setExternalData(external);

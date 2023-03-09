@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
@@ -19,8 +20,9 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,6 +30,7 @@ public class DisqualifiedOfficerService {
 
     public static final String APPLICATION_NAME_SPACE = "disqualified-officers-data-api";
     private static final Logger logger = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS").withZone(ZoneId.of("Z"));
 
     @Autowired
     private DisqualifiedOfficerRepository repository;
@@ -44,9 +47,6 @@ public class DisqualifiedOfficerService {
     @Autowired
     DisqualifiedOfficerApiService disqualifiedOfficerApiService;
 
-    private final DateTimeFormatter dateTimeFormatter =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
     /**
      * Save or update a natural disqualification
      * @param contextId     Id used for chsKafkaCall
@@ -55,14 +55,12 @@ public class DisqualifiedOfficerService {
      */
     public void processNaturalDisqualification(String contextId, String officerId,
                                                InternalNaturalDisqualificationApi requestBody) {
+        Optional<DisqualificationDocument> existingDocument = repository.findById(officerId);
 
-        boolean isLatestRecord = isLatestRecord(officerId, requestBody.getInternalData().getDeltaAt());
-
-        if (isLatestRecord) {
-
+        if (existingDocument.isEmpty() ||
+                isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument.get())) {
             DisqualificationDocument document = transformer.transformNaturalDisqualifiedOfficer(officerId, requestBody);
-
-            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL);
+            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL, existingDocument.orElse(null));
         } else {
             logger.info("Disqualification not persisted as the record provided is not the latest record.");
         }
@@ -76,14 +74,12 @@ public class DisqualifiedOfficerService {
      */
     public void processCorporateDisqualification(String contextId, String officerId,
                                                  InternalCorporateDisqualificationApi requestBody) {
+        Optional<DisqualificationDocument> existingDocument = repository.findById(officerId);
 
-        boolean isLatestRecord = isLatestRecord(officerId, requestBody.getInternalData().getDeltaAt());
-
-        if (isLatestRecord) {
-
+        if (existingDocument.isEmpty() ||
+                isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument.get())) {
             DisqualificationDocument document = transformer.transformCorporateDisqualifiedOfficer(officerId, requestBody);
-
-            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE);
+            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE, existingDocument.orElse(null));
         } else {
             logger.info("Disqualification not persisted as the record provided is not the latest record.");
         }
@@ -148,17 +144,11 @@ public class DisqualifiedOfficerService {
             officerId));
     }
 
-    /**
-     * Check the record hasn't been update more recently
-     * @param officerId Mongo Id
-     * @param deltaAt   Time of update
-     * @return isLatestRecord True if we are updating the latest record
-     */
-    private boolean isLatestRecord(String officerId, OffsetDateTime deltaAt) {
-        String formattedDate = deltaAt.format(dateTimeFormatter);
-        List<DisqualificationDocument> disqualifications = repository
-                .findUpdatedDisqualification(officerId, formattedDate);
-        return disqualifications.isEmpty();
+    private boolean isLatestRecord(OffsetDateTime deltaAt, DisqualificationDocument existingDocument) {
+        // If the delta_at is empty/null OR the delta_at in the request is after the existing delta_at
+        return  StringUtils.isBlank(existingDocument.getDeltaAt()) ||
+                deltaAt.isAfter(ZonedDateTime.parse(existingDocument.getDeltaAt(), FORMATTER)
+                        .toOffsetDateTime());
     }
 
     /**
@@ -167,14 +157,15 @@ public class DisqualifiedOfficerService {
      * @param officerId Mongo id
      * @param document  Transformed Data
      */
-    private void saveAndCallChsKafka(String contextId, String officerId,
-            DisqualificationDocument document, DisqualificationResourceType type) {
-        Created created = getCreatedFromCurrentRecord(officerId);
-        if(created == null) {
-            document.setCreated(new Created().setAt(document.getUpdated().getAt()));
-        } else {
-            document.setCreated(created);
-        }
+    private void saveAndCallChsKafka(
+            String contextId, String officerId,
+            DisqualificationDocument document, DisqualificationResourceType type,
+            DisqualificationDocument existingDocument) {
+
+        Optional.ofNullable(existingDocument)
+                .map(DisqualificationDocument::getCreated)
+                    .ifPresentOrElse(document::setCreated,
+                        () -> document.setCreated(new Created().setAt(document.getUpdated().getAt())));
 
         disqualifiedOfficerApiService.invokeChsKafkaApi(
                 new ResourceChangedRequest(contextId, officerId,
@@ -191,16 +182,6 @@ public class DisqualifiedOfficerService {
         } catch (IllegalArgumentException illegalArgumentEx) {
             throw new BadRequestException(illegalArgumentEx.getMessage());
         }
-    }
-
-    /**
-     * Check whether we are updating a record and if so persist created time
-     * @param officerId Mongo Id
-     * @return created if this is an update save the previous created to the new document
-     */
-    private Created getCreatedFromCurrentRecord(String officerId) {
-        Optional<DisqualificationDocument> doc = repository.findById(officerId);
-        return doc.map(DisqualificationDocument::getCreated).orElse(null);
     }
 
     public DisqualificationDocument retrieveDeleteDisqualification(String officerId) {

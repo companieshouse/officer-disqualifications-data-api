@@ -6,21 +6,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DisqualifiedCorporateOfficerReadConverterTest {
+class DisqualifiedCorporateOfficerReadConverterTest {
 
     private static final String COMPANY_NUMBER = "123456";
 
     private DisqualifiedCorporateOfficerReadConverter converter;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         converter = new DisqualifiedCorporateOfficerReadConverter(new ObjectMapper());
     }
 
     @Test
-    public void canConvertDocument() {
+    void canConvertDocument() {
         Document document = new Document("company_number", COMPANY_NUMBER);
         CorporateDisqualificationApi disqualification = converter.convert(document);
 
