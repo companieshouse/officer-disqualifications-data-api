@@ -5,7 +5,6 @@ import com.google.api.client.http.HttpResponseException;
 
 import java.util.function.Function;
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +22,7 @@ import uk.gov.companieshouse.logging.Logger;
 
 import java.util.function.Supplier;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,7 +87,7 @@ class DisqualifiedOfficerApiClientServiceTest {
 
         setupExceptionScenario(503, "Service Unavailable");
 
-        Assert.assertThrows(ServiceUnavailableException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
+        assertThrows(ServiceUnavailableException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
 
         verifyExceptionScenario();
     }
@@ -97,7 +97,7 @@ class DisqualifiedOfficerApiClientServiceTest {
 
         setupExceptionScenario(500, "Internal Service Error");
 
-        Assert.assertThrows(ServiceUnavailableException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
+        assertThrows(ServiceUnavailableException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
 
         verifyExceptionScenario();
     }
@@ -107,7 +107,7 @@ class DisqualifiedOfficerApiClientServiceTest {
 
         setupExceptionScenario(200, "");
 
-        Assert.assertThrows(RuntimeException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
+        assertThrows(RuntimeException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
 
         verifyExceptionScenario();
     }

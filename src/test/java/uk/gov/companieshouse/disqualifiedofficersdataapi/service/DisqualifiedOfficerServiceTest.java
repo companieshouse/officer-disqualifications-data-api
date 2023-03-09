@@ -6,7 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.disqualification.*;
+import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.InternalDisqualificationApiInternalData;
+import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
@@ -64,7 +68,7 @@ class DisqualifiedOfficerServiceTest {
     private DisqualificationDocument document;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         OffsetDateTime date = OffsetDateTime.now();
         request = new InternalNaturalDisqualificationApi();
         corpRequest = new InternalCorporateDisqualificationApi();
@@ -77,7 +81,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void processNaturalDisqualificationSavesDisqualificationIfNoExistingDocument() {
+    void processNaturalDisqualificationSavesDisqualificationIfNoExistingDocument() {
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.empty());
         when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
 
@@ -89,7 +93,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasEmptyDeltaAt() {
+    void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasEmptyDeltaAt() {
         document.setDeltaAt("");
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
@@ -102,7 +106,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasNullDeltaAt() {
+    void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasNullDeltaAt() {
         document.setDeltaAt(null);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
@@ -115,7 +119,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAt() {
+    void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAt() {
         document.setCreated(new Created().setAt(LocalDateTime.now()));
         document.setDeltaAt(PAST_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
@@ -129,7 +133,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAtAfterNow() {
+    void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAtAfterNow() {
         document.setDeltaAt(FUTURE_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
 
@@ -141,7 +145,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void processCorporateDisqualificationSavesDisqualificationIfNoExistingDocument() {
+    void processCorporateDisqualificationSavesDisqualificationIfNoExistingDocument() {
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.empty());
         when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
 
@@ -153,7 +157,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasEmptyDeltaAt() {
+    void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasEmptyDeltaAt() {
         document.setDeltaAt("");
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
@@ -166,7 +170,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasNullDeltaAt() {
+    void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasNullDeltaAt() {
         document.setDeltaAt(null);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
@@ -179,7 +183,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAt() {
+    void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAt() {
         document.setCreated(new Created().setAt(LocalDateTime.now()));
         document.setDeltaAt(PAST_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
@@ -193,7 +197,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void processCoporateDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAtAfterNow() {
+    void processCoporateDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAtAfterNow() {
         document.setDeltaAt(FUTURE_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
 
@@ -269,7 +273,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void deleteNaturalDisqualificationDeletesDisqualification() {
+    void deleteNaturalDisqualificationDeletesDisqualification() {
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         NaturalDisqualificationDocument doc = new NaturalDisqualificationDocument();
         doc.setData(new NaturalDisqualificationApi());
@@ -284,7 +288,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void deleteCorporateDisqualificationDeletesDisqualification() {
+    void deleteCorporateDisqualificationDeletesDisqualification() {
         document.setCorporateOfficer(true);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         CorporateDisqualificationDocument doc = new CorporateDisqualificationDocument();
@@ -301,7 +305,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void deleteCorporateDisqualificationThrowsErrorWhenNatural() {
+    void deleteCorporateDisqualificationThrowsErrorWhenNatural() {
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
 
         assertThrows(IllegalArgumentException.class, () -> service.deleteDisqualification
@@ -311,7 +315,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    public void deleteNaturalDisqualificationThrowsErrorWhenCorporate() {
+    void deleteNaturalDisqualificationThrowsErrorWhenCorporate() {
         document.setCorporateOfficer(true);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
 

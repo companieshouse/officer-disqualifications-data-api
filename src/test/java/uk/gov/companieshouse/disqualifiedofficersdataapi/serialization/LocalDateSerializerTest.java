@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,12 +26,12 @@ class LocalDateSerializerTest {
     private ArgumentCaptor<String> dateString;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         serializer = new LocalDateSerializer();
     }
 
     @Test
-    public void dateShouldSerialize() throws Exception {
+    void dateShouldSerialize() throws Exception {
         LocalDate date = LocalDate.of(2020, 1, 1);
 
         serializer.serialize(date, generator, null);

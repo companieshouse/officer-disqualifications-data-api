@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DisqualifiedNaturalOfficerReadConverterTest {
 
@@ -15,15 +15,15 @@ class DisqualifiedNaturalOfficerReadConverterTest {
     private DisqualifiedNaturalOfficerReadConverter converter;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         converter = new DisqualifiedNaturalOfficerReadConverter(new ObjectMapper());
     }
 
     @Test
-    public void canConvertDocument() {
+    void canConvertDocument() {
         Document document = new Document("forename", OFFICER_NAME);
         NaturalDisqualificationApi disqualification = converter.convert(document);
 
-        assertEquals(disqualification.getForename(),OFFICER_NAME);
+        assertEquals(disqualification.getForename(), OFFICER_NAME);
     }
 }

@@ -79,7 +79,7 @@ class DisqualifiedOfficerControllerTest {
 
     @Test
     @DisplayName("Disqualified Officer PUT request")
-    public void callDisqualifiedOfficerPutRequest() throws Exception {
+    void callDisqualifiedOfficerPutRequest() throws Exception {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
         request.setInternalData(new InternalDisqualificationApiInternalData());
         request.setExternalData(new NaturalDisqualificationApi());
@@ -178,7 +178,7 @@ class DisqualifiedOfficerControllerTest {
 
     @Test
     @DisplayName("Disqualified Officer PUT request - IllegalArgumentException status code 404 not found")
-    public void callDisqualifiedOfficerPutRequestIllegalArgument() throws Exception {
+    void callDisqualifiedOfficerPutRequestIllegalArgument() throws Exception {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
         request.setInternalData(new InternalDisqualificationApiInternalData());
         request.setExternalData(new NaturalDisqualificationApi());
@@ -199,7 +199,7 @@ class DisqualifiedOfficerControllerTest {
 
     @Test
     @DisplayName("Disqualified Officer PUT request - BadRequestException status code 400")
-    public void callDisqualifiedOfficerPutRequestBadRequest() throws Exception {
+    void callDisqualifiedOfficerPutRequestBadRequest() throws Exception {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
         request.setInternalData(new InternalDisqualificationApiInternalData());
         request.setExternalData(new NaturalDisqualificationApi());
@@ -220,7 +220,7 @@ class DisqualifiedOfficerControllerTest {
 
     @Test
     @DisplayName("Disqualified Officer PUT request - MethodNotAllowed status code 405")
-    public void callDisqualifiedOfficerPutRequestMethodNotAllowed() throws Exception {
+    void callDisqualifiedOfficerPutRequestMethodNotAllowed() throws Exception {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
         request.setInternalData(new InternalDisqualificationApiInternalData());
         request.setExternalData(new NaturalDisqualificationApi());
@@ -241,7 +241,7 @@ class DisqualifiedOfficerControllerTest {
 
     @Test
     @DisplayName("Disqualified Officer PUT request - InternalServerError status code 500")
-    public void callDisqualifiedOfficerPutRequestInternalServerError() throws Exception {
+    void callDisqualifiedOfficerPutRequestInternalServerError() throws Exception {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
         request.setInternalData(new InternalDisqualificationApiInternalData());
         request.setExternalData(new NaturalDisqualificationApi());
@@ -262,7 +262,7 @@ class DisqualifiedOfficerControllerTest {
 
     @Test
     @DisplayName("Disqualified Officer PUT request - ServiceUnavailable status code 503")
-    public void callDisqualifiedOfficerPutRequestServiceUnavailable() throws Exception {
+    void callDisqualifiedOfficerPutRequestServiceUnavailable() throws Exception {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
         request.setInternalData(new InternalDisqualificationApiInternalData());
         request.setExternalData(new NaturalDisqualificationApi());
@@ -283,7 +283,7 @@ class DisqualifiedOfficerControllerTest {
 
     @Test
     @DisplayName("Disqualified Officer PUT request - Forbidden status code 403")
-    public void callDisqualifiedOfficerPutRequestForbidden() throws Exception {
+    void callDisqualifiedOfficerPutRequestForbidden() throws Exception {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
         request.setInternalData(new InternalDisqualificationApiInternalData());
         request.setExternalData(new NaturalDisqualificationApi());
@@ -300,7 +300,7 @@ class DisqualifiedOfficerControllerTest {
 
     @Test
     @DisplayName("Disqualified Officer DELETE request")
-    public void callDisqualifiedOfficerDeleteRequest() throws Exception {
+    void callDisqualifiedOfficerDeleteRequest() throws Exception {
 
         doNothing()
                 .when(disqualifiedOfficerService).deleteDisqualification(anyString(), anyString());
@@ -316,7 +316,7 @@ class DisqualifiedOfficerControllerTest {
 
     @Test
     @DisplayName("Disqualified Officer DELETE request - ServiceUnavailable status code 503")
-    public void callDisqualifiedOfficerDeleteRequestServiceUnavailable() throws Exception {
+    void callDisqualifiedOfficerDeleteRequestServiceUnavailable() throws Exception {
 
         doThrow(new ServiceUnavailableException("Service Unavailable - connection issues"))
                 .when(disqualifiedOfficerService).deleteDisqualification(anyString(), anyString());

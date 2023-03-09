@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DisqualifiedNaturalOfficerWriteConverterTest {
 
@@ -15,12 +15,12 @@ class DisqualifiedNaturalOfficerWriteConverterTest {
     private DisqualifiedNaturalOfficerWriteConverter converter;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         converter = new DisqualifiedNaturalOfficerWriteConverter(new ObjectMapper());
     }
 
     @Test
-    public void canConvertDocument() {
+    void canConvertDocument() {
         NaturalDisqualificationApi api = new NaturalDisqualificationApi();
         api.setPersonNumber(OFFICER_ID);
 
