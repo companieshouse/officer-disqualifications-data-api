@@ -47,9 +47,6 @@ public class DisqualifiedOfficerService {
     @Autowired
     DisqualifiedOfficerApiService disqualifiedOfficerApiService;
 
-    private final DateTimeFormatter dateTimeFormatter =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
     /**
      * Save or update a natural disqualification
      * @param contextId     Id used for chsKafkaCall
@@ -60,10 +57,10 @@ public class DisqualifiedOfficerService {
                                                InternalNaturalDisqualificationApi requestBody) {
         Optional<DisqualificationDocument> existingDocument = repository.findById(officerId);
 
-        // If the document does not exist OR the delta_at in the request is after the delta_at being processed
-        if (isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument)) {
+        if (existingDocument.isEmpty() ||
+                isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument.get())) {
             DisqualificationDocument document = transformer.transformNaturalDisqualifiedOfficer(officerId, requestBody);
-            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL, existingDocument);
+            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL, existingDocument.orElse(null));
         } else {
             logger.info("Disqualification not persisted as the record provided is not the latest record.");
         }
@@ -79,9 +76,10 @@ public class DisqualifiedOfficerService {
                                                  InternalCorporateDisqualificationApi requestBody) {
         Optional<DisqualificationDocument> existingDocument = repository.findById(officerId);
 
-        if (isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument)) {
+        if (existingDocument.isEmpty() ||
+                isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument.get())) {
             DisqualificationDocument document = transformer.transformCorporateDisqualifiedOfficer(officerId, requestBody);
-            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE, existingDocument);
+            saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE, existingDocument.orElse(null));
         } else {
             logger.info("Disqualification not persisted as the record provided is not the latest record.");
         }
@@ -146,12 +144,11 @@ public class DisqualifiedOfficerService {
             officerId));
     }
 
-    private boolean isLatestRecord(OffsetDateTime deltaAt, Optional<DisqualificationDocument> existingDocument) {
-        // If the document does not exist OR the delta_at is blank/null OR the delta_at in the request is after the new delta_at
-        return  existingDocument.isEmpty() ||
-                StringUtils.isBlank(existingDocument.get().getDeltaAt()) ||
-                deltaAt.isAfter(ZonedDateTime.parse(existingDocument.get().getDeltaAt(), FORMATTER)
-                                            .toOffsetDateTime());
+    private boolean isLatestRecord(OffsetDateTime deltaAt, DisqualificationDocument existingDocument) {
+        // If the delta_at is empty/null OR the delta_at in the request is after the existing delta_at
+        return  StringUtils.isBlank(existingDocument.getDeltaAt()) ||
+                deltaAt.isAfter(ZonedDateTime.parse(existingDocument.getDeltaAt(), FORMATTER)
+                        .toOffsetDateTime());
     }
 
     /**
@@ -160,14 +157,15 @@ public class DisqualifiedOfficerService {
      * @param officerId Mongo id
      * @param document  Transformed Data
      */
-    private void saveAndCallChsKafka(String contextId, String officerId,
-            DisqualificationDocument document, DisqualificationResourceType type, Optional<DisqualificationDocument> existingDocument) {
-        Created created = getCreatedFromCurrentRecord(existingDocument);
-        if(created == null) {
-            document.setCreated(new Created().setAt(document.getUpdated().getAt()));
-        } else {
-            document.setCreated(created);
-        }
+    private void saveAndCallChsKafka(
+            String contextId, String officerId,
+            DisqualificationDocument document, DisqualificationResourceType type,
+            DisqualificationDocument existingDocument) {
+
+        Optional.ofNullable(existingDocument)
+                .map(DisqualificationDocument::getCreated)
+                    .ifPresentOrElse(document::setCreated,
+                        () -> document.setCreated(new Created().setAt(document.getUpdated().getAt())));
 
         disqualifiedOfficerApiService.invokeChsKafkaApi(
                 new ResourceChangedRequest(contextId, officerId,
@@ -184,14 +182,6 @@ public class DisqualifiedOfficerService {
         } catch (IllegalArgumentException illegalArgumentEx) {
             throw new BadRequestException(illegalArgumentEx.getMessage());
         }
-    }
-
-    /**
-     * Check whether we are updating a record and if so persist created time
-     * @return created if this is an update save the previous created to the new document
-     */
-    private Created getCreatedFromCurrentRecord(Optional<DisqualificationDocument> doc) {
-        return doc.map(DisqualificationDocument::getCreated).orElse(null);
     }
 
     public DisqualificationDocument retrieveDeleteDisqualification(String officerId) {

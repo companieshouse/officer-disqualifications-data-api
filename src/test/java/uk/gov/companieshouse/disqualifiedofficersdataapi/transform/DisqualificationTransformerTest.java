@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-public class DisqualificationTransformerTest {
+class DisqualificationTransformerTest {
 
     private static final String OFFICER_ID = "officerId";
     private static final String OFFICER_DISQ_ID = "officerDisqId";

@@ -22,7 +22,7 @@ import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 
 @ExtendWith(MockitoExtension.class)
-public class ResourceChangedRequestMapperTest {
+class ResourceChangedRequestMapperTest {
 
     private static final String EXPECTED_CONTEXT_ID = "35234234";
     private static final String DATE = "date";

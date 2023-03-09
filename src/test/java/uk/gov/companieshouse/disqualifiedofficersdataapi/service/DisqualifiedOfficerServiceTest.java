@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class DisqualifiedOfficerServiceTest {
+class DisqualifiedOfficerServiceTest {
 
     private static final String OFFICER_ID = "officerId";
     private static final String PAST_DATE = "20220121133129395348";
@@ -102,6 +102,19 @@ public class DisqualifiedOfficerServiceTest {
     }
 
     @Test
+    public void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasNullDeltaAt() {
+        document.setDeltaAt(null);
+        when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
+
+        service.processNaturalDisqualification("", OFFICER_ID, request);
+
+        verify(repository).save(document);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+                DisqualificationResourceType.NATURAL, null, false));
+    }
+
+    @Test
     public void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAt() {
         document.setCreated(new Created().setAt(LocalDateTime.now()));
         document.setDeltaAt(PAST_DATE);
@@ -142,6 +155,19 @@ public class DisqualifiedOfficerServiceTest {
     @Test
     public void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasEmptyDeltaAt() {
         document.setDeltaAt("");
+        when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
+
+        service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
+
+        verify(repository).save(document);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+                DisqualificationResourceType.CORPORATE, null, false));
+    }
+
+    @Test
+    public void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasNullDeltaAt() {
+        document.setDeltaAt(null);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
 

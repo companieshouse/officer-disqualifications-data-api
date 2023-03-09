@@ -8,7 +8,7 @@ import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 
 import static org.junit.Assert.assertEquals;
 
-public class DisqualifiedNaturalOfficerReadConverterTest {
+class DisqualifiedNaturalOfficerReadConverterTest {
 
     private static final String OFFICER_NAME = "officer";
 
