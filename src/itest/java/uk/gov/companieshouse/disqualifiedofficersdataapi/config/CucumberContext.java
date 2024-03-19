@@ -1,8 +1,9 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.config;
 
+import org.springframework.http.ResponseEntity;
+
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.http.ResponseEntity;
 
 /**
  * Context to store the state.

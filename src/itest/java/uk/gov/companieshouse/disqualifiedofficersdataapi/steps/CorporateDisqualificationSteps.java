@@ -89,7 +89,7 @@ public class CorporateDisqualificationSteps {
         ResponseEntity<CorporateDisqualificationApi> response = restTemplate.exchange(uri, HttpMethod.GET, request,
                 CorporateDisqualificationApi.class, officerId);
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
         CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
     }
 
@@ -116,7 +116,7 @@ public class CorporateDisqualificationSteps {
         ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, officerId);
 
         this.officerId = officerId;
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
     }
 
     @Then("the corporate Get call response body should match {string} file")
