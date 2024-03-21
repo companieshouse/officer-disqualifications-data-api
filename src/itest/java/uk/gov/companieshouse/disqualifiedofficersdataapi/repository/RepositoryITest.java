@@ -1,21 +1,21 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.repository;
 
-import java.time.OffsetDateTime;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractMongoConfig;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
 
+import java.time.OffsetDateTime;
+
 @Testcontainers
-@DataMongoTest(excludeAutoConfiguration = EmbeddedMongoAutoConfiguration.class)
-public class RepositoryITest extends AbstractMongoConfig {
+@DataMongoTest
+class RepositoryITest extends AbstractMongoConfig {
 
   @Autowired
   private NaturalDisqualifiedOfficerRepository naturalRepository;
