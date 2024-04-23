@@ -124,7 +124,7 @@ variable "use_set_environment_files" {
   description = "Toggle default global and shared  environment files"
 }
 
-variable "disqualified_officers_data_api" {
+variable "disqualified_officers_data_api_version" {
   type        = string
   description = "The version of the disqualified-officers-data-api container to run."
 }

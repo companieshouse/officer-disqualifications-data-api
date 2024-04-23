@@ -8,7 +8,7 @@ locals {
   eric_port                  = "10000"
   docker_repo                = "disqualified-officers-data-api"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
-  lb_listener_rule_priority  = 53
+  lb_listener_rule_priority  = 57
   lb_listener_paths          = ["/disqualified-officers/{type:(natural|corporate|delete)}/*/internal"]
   healthcheck_path           = "/disqualified-officers-data-api/healthcheck" #healthcheck path for disqualified officers data api
   healthcheck_matcher        = "200"
