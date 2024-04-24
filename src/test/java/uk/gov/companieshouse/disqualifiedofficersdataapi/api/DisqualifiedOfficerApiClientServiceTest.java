@@ -2,8 +2,6 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
-
-import java.util.function.Function;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,12 +18,11 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
 import uk.gov.companieshouse.logging.Logger;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DisqualifiedOfficerApiClientServiceTest {
@@ -78,7 +75,7 @@ class DisqualifiedOfficerApiClientServiceTest {
 
         verify(apiClientService, times(1)).getInternalApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource("/resource-changed", changedResource);
+        verify(privateChangedResourceHandler, times(1)).postChangedResource("/private/resource-changed", changedResource);
         verify(changedResourcePost, times(1)).execute();
     }
 
@@ -128,7 +125,7 @@ class DisqualifiedOfficerApiClientServiceTest {
     private void verifyExceptionScenario() throws ApiErrorResponseException {
         verify(apiClientService, times(1)).getInternalApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource("/resource-changed",
+        verify(privateChangedResourceHandler, times(1)).postChangedResource("/private/resource-changed",
                 changedResource);
         verify(changedResourcePost, times(1)).execute();
     }

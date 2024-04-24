@@ -1,8 +1,5 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.steps;
 
-import java.io.IOException;
-import java.util.List;
-
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -21,12 +18,14 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationD
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doThrow;
-import static org.assertj.core.api.Assertions.assertThat;
+import java.io.IOException;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
 public class DisqualificationSteps {
@@ -75,7 +74,7 @@ public class DisqualificationSteps {
 
         ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.DELETE, request, Void.class, officerId);
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
     }
 
     @When("officer id does not exists for {string}")
@@ -104,7 +103,7 @@ public class DisqualificationSteps {
     @Then("nothing is persisted in the database")
     public void nothing_persisted_to_database() {
         List<DisqualificationDocument> disqDoc = repository.findAll();
-        Assertions.assertThat(disqDoc).hasSize(0);
+        Assertions.assertThat(disqDoc).isEmpty();
     }
 
     @Then("I should receive {int} status code")
@@ -115,7 +114,7 @@ public class DisqualificationSteps {
 
     @Then("the disqualified officer with officer id {string} still exists in the database")
     public void disqualified_officer_exists(String officerId) {
-        Assertions.assertThat(repository.existsById(officerId));
+        Assertions.assertThat(repository.existsById(officerId)).isTrue();
     }
 
 }
