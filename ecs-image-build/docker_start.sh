@@ -1,5 +1,6 @@
 #!/bin/bash
 #
+#
 # Start script for disqualified-officers-data-api
 
 PORT=8080
