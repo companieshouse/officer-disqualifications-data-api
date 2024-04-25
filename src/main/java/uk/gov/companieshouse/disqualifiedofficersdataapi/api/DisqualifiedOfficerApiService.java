@@ -1,8 +1,5 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,10 +11,13 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
 import uk.gov.companieshouse.logging.Logger;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 @Service
 public class DisqualifiedOfficerApiService {
 
-    private static final String CHANGED_RESOURCE_URI = "/resource-changed";
+    private static final String CHANGED_RESOURCE_URI = "/private/resource-changed";
     private final Logger logger;
     private final String chsKafkaUrl;
     private final ApiClientService apiClientService;
@@ -60,10 +60,10 @@ public class DisqualifiedOfficerApiService {
         } catch (ApiErrorResponseException exp) {
             HttpStatus statusCode = HttpStatus.valueOf(exp.getStatusCode());
             if (!statusCode.is2xxSuccessful()) {
-                logger.error("Unsuccessful call to /resource-changed endpoint", exp);
+                logger.error("Unsuccessful call to /private/resource-changed endpoint", exp);
                 throw new ServiceUnavailableException(exp.getMessage());
             } else {
-                logger.error("Error occurred while calling /resource-changed endpoint", exp);
+                logger.error("Error occurred while calling /private/resource-changed endpoint", exp);
                 throw new RuntimeException(exp);
             }
         }
