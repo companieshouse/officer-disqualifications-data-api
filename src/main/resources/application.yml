@@ -4,7 +4,7 @@ management:
     web:
       base-path: /
       path-mapping:
-        health: /disqualified-officers-data-api/healthcheck
+        health: /disqualified-officers/healthcheck
     health:
       show-details: never
       enabled: true
