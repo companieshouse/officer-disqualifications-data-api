@@ -9,7 +9,7 @@ locals {
   docker_repo                = "disqualified-officers-data-api"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
   lb_listener_rule_priority  = 57
-  lb_listener_paths          = ["/disqualified-officers/natural/*/internal", "/disqualified-officers/corporate/*/internal", "/disqualified-officers/delete/*/internal", "/disqualified-officers/natural/*", "/disqualified-officers/corporate/*", "/disqualified-officers/delete/*"]
+  lb_listener_paths          = ["/disqualified-officers/natural/*/internal", "/disqualified-officers/corporate/*/internal", "/disqualified-officers/delete/*/internal", "/disqualified-officers/natural/*", "/disqualified-officers/corporate/*"]
   healthcheck_path           = "/disqualified-officers/healthcheck" #healthcheck path for disqualified officers data api
   healthcheck_matcher        = "200"
   s3_config_bucket           = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
