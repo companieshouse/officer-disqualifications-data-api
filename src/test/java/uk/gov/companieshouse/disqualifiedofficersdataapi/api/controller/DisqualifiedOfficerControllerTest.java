@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,6 +32,7 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualifi
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DisqualifiedOfficerService;
 import uk.gov.companieshouse.logging.Logger;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
@@ -40,7 +42,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -384,4 +388,72 @@ class DisqualifiedOfficerControllerTest {
                         .header("ERIC-Identity-Type", "key"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("Disqualified Officer OPTIONS request - CORS")
+    void callDisqualifiedOfficerOptionsRequestCORS() throws Exception {
+
+        MvcResult result = mockMvc.perform(options(NATURAL_GET_URL)
+                .contentType(APPLICATION_JSON)
+                .header("Origin", "")
+                )
+            .andExpect(status().isNoContent())
+            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN))
+            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS))
+            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_MAX_AGE))
+            .andReturn();
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer GET request - CORS")
+    void callDisqualifiedOfficerGetRequestCORS() throws Exception {
+        NaturalDisqualificationDocument naturalDisqualification = new NaturalDisqualificationDocument();
+        NaturalDisqualificationApi data = new NaturalDisqualificationApi();
+        naturalDisqualification.setData(data);
+
+        doReturn(naturalDisqualification)
+                .when(disqualifiedOfficerService).retrieveNaturalDisqualification(anyString());
+
+        MvcResult result = mockMvc.perform(get(NATURAL_GET_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("Origin", "")
+                        .header("ERIC-Allowed-Origin", "some-origin")
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "SOME_IDENTITY")
+                        .header("ERIC-Identity-Type", "key")
+                        )
+                .andExpect(status().isOk())
+                .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")))
+                .andReturn();
+
+        assertEquals(data, objectMapper.readValue(result.getResponse().getContentAsString(), NaturalDisqualificationApi.class));
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer PUT request - CORS")
+    void callDisqualifiedOfficerPutRequestCORS() throws Exception {
+        InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
+        request.setInternalData(new InternalDisqualificationApiInternalData());
+        request.setExternalData(new NaturalDisqualificationApi());
+
+        doNothing().when(disqualifiedOfficerService).processNaturalDisqualification(anyString(), anyString(),
+                isA(InternalNaturalDisqualificationApi.class));
+
+        mockMvc.perform(put(NATURAL_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("Origin", "")
+                        .header("ERIC-Allowed-Origin", "some-origin")
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                        .content(gson.toJson(request)))
+                .andExpect(status().isForbidden())
+                .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")))
+                .andReturn();
+    }
+
 }

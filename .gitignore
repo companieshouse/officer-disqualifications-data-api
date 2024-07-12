@@ -29,3 +29,7 @@ hs_err_pid*
 
 # VS Code
 settings.json
+
+# Vim files
+*.vim
+.*.sw?
