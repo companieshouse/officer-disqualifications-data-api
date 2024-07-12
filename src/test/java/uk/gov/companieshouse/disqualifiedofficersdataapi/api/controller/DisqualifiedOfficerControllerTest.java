@@ -46,6 +46,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = DisqualifiedOfficerController.class)
@@ -432,6 +433,24 @@ class DisqualifiedOfficerControllerTest {
     }
 
     @Test
+    @DisplayName("Forbidden Disqualified Officer GET request - CORS")
+    void getCompanyExemptionsForbiddenCORS() throws Exception {
+
+        MvcResult result = mockMvc.perform(get(NATURAL_GET_URL)
+                .contentType(APPLICATION_JSON)
+                .header("Origin", "")
+                .header("ERIC-Allowed-Origin", "")
+                .header("x-request-id", "5342342")
+                .header("ERIC-Identity", "Test-Identity")
+                .header("ERIC-Identity-Type", "oauth2"))
+            .andExpect(status().isForbidden())
+            .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+            .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")))
+            .andExpect(content().string(""))
+            .andReturn();
+    }
+
+    @Test
     @DisplayName("Disqualified Officer PUT request - CORS")
     void callDisqualifiedOfficerPutRequestCORS() throws Exception {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
@@ -453,6 +472,7 @@ class DisqualifiedOfficerControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")))
+                .andExpect(content().string(""))
                 .andReturn();
     }
 
