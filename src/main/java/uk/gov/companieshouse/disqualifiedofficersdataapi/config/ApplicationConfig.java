@@ -6,13 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
-import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
-import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.PermissionToAct;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequestMapper;
@@ -25,12 +26,15 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.serialization.LocalDate
 import uk.gov.companieshouse.disqualifiedofficersdataapi.serialization.LocalDateSerializer;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.function.Supplier;
 
 @Configuration
 public class ApplicationConfig {
+
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+            .withZone(ZoneOffset.UTC);
 
     /**
      * mongoCustomConversions.
@@ -47,13 +51,13 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public Supplier<String> offsetDateTimeGenerator() {
-        return () -> String.valueOf(OffsetDateTime.now());
+    public Supplier<String> timestampGenerator() {
+        return () -> dateTimeFormatter.format(Instant.now());
     }
 
     @Bean
     public Function<ResourceChangedRequest, ChangedResource> mapper() {
-        ResourceChangedRequestMapper mapper = new ResourceChangedRequestMapper(offsetDateTimeGenerator());
+        ResourceChangedRequestMapper mapper = new ResourceChangedRequestMapper(timestampGenerator());
         return mapper::mapChangedResource;
     }
 

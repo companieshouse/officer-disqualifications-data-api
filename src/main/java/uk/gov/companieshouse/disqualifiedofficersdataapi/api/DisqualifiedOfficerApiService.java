@@ -12,7 +12,6 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnava
 import uk.gov.companieshouse.logging.Logger;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @Service
 public class DisqualifiedOfficerApiService {
@@ -29,7 +28,6 @@ public class DisqualifiedOfficerApiService {
     public DisqualifiedOfficerApiService(@Value("${chs.kafka.api.endpoint}") String chsKafkaUrl,
             ApiClientService apiClientService,
             Logger logger,
-            Supplier<String> timestampGenerator,
             Function<ResourceChangedRequest, ChangedResource> mapper) {
         this.chsKafkaUrl = chsKafkaUrl;
         this.apiClientService = apiClientService;
