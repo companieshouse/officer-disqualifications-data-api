@@ -1,8 +1,12 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,6 +17,7 @@ import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificatio
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
@@ -32,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -42,8 +48,15 @@ import static org.mockito.Mockito.when;
 class DisqualifiedOfficerServiceTest {
 
     private static final String OFFICER_ID = "officerId";
+    private static final String CURRENT_DATE = "20240121133129395348";
     private static final String PAST_DATE = "20220121133129395348";
     private static final String FUTURE_DATE = "30220121133129395348";
+    private static final OffsetDateTime CURRENT_ZDT = ZonedDateTime.parse(CURRENT_DATE,
+                    DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
+                            .withZone(ZoneOffset.UTC))
+            .toOffsetDateTime();
+
+
 
     @Mock
     private DisqualifiedOfficerRepository repository;
@@ -69,11 +82,10 @@ class DisqualifiedOfficerServiceTest {
 
     @BeforeEach
     void setUp() {
-        OffsetDateTime date = OffsetDateTime.now();
         request = new InternalNaturalDisqualificationApi();
         corpRequest = new InternalCorporateDisqualificationApi();
         InternalDisqualificationApiInternalData internal = new InternalDisqualificationApiInternalData();
-        internal.setDeltaAt(date);
+        internal.setDeltaAt(CURRENT_ZDT);
         request.setInternalData(internal);
         corpRequest.setInternalData(internal);
         document = new DisqualificationDocument();
@@ -133,6 +145,34 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
+    void processRetriedNaturalDisqualificationDelta() {
+        document.setCreated(new Created().setAt(LocalDateTime.now()));
+        document.setDeltaAt(CURRENT_DATE);
+        when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
+
+        service.processNaturalDisqualification("", OFFICER_ID, request);
+
+        verify(repository).save(document);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+                DisqualificationResourceType.NATURAL, null, false));
+    }
+
+    @Test
+    void processRetriedNaturalDisqualificationDeltaFailsSave() {
+        document.setCreated(new Created().setAt(LocalDateTime.now()));
+        document.setDeltaAt(PAST_DATE);
+        when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
+        when(repository.save(document)).thenThrow(new IllegalArgumentException());
+
+        Executable executable = () -> service.processNaturalDisqualification("", OFFICER_ID, request);
+
+        assertThrows(BadRequestException.class, executable);
+        verify(disqualifiedOfficerApiService, never()).invokeChsKafkaApi(any());
+    }
+
+    @Test
     void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAtAfterNow() {
         document.setDeltaAt(FUTURE_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
@@ -186,6 +226,20 @@ class DisqualifiedOfficerServiceTest {
     void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAt() {
         document.setCreated(new Created().setAt(LocalDateTime.now()));
         document.setDeltaAt(PAST_DATE);
+        when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
+
+        service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
+
+        verify(repository).save(document);
+        verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
+                DisqualificationResourceType.CORPORATE, null, false));
+    }
+
+    @Test
+    void processRetriedCorporateDisqualificationDeltaAt() {
+        document.setCreated(new Created().setAt(LocalDateTime.now()));
+        document.setDeltaAt(CURRENT_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
 
@@ -284,7 +338,7 @@ class DisqualifiedOfficerServiceTest {
         verify(repository).delete(doc);
         verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
                 DisqualificationResourceType.NATURAL, doc.getData(), true));
-        assertEquals(doc.getData().getKind().toString(), "natural-disqualification");
+        assertEquals("natural-disqualification", doc.getData().getKind().toString());
     }
 
     @Test
@@ -301,7 +355,7 @@ class DisqualifiedOfficerServiceTest {
         verify(repository).delete(doc);
         verify(disqualifiedOfficerApiService).invokeChsKafkaApi(new ResourceChangedRequest("", "officerId",
                 DisqualificationResourceType.CORPORATE, doc.getData(), true));
-        assertEquals(doc.getData().getKind().toString(), "corporate-disqualification");
+        assertEquals("corporate-disqualification", doc.getData().getKind().toString());
     }
 
     @Test

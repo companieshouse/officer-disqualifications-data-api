@@ -18,19 +18,16 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationD
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
 public class DisqualificationSteps {
-
-    private String officerId;
 
     @Autowired
     public DisqualifiedOfficerApiService disqualifiedApiService;
@@ -52,25 +49,24 @@ public class DisqualificationSteps {
     }
 
     @When("CHS kafka API service is unavailable")
-    public void chs_kafka_service_unavailable() throws IOException {
+    public void chs_kafka_service_unavailable() {
         doThrow(ServiceUnavailableException.class)
             .when(disqualifiedApiService).invokeChsKafkaApi(any(ResourceChangedRequest.class));
     }
 
     @When("I send DELETE request with officer id {string}")
-    public void send_delete_request_for_officer(String officerId) throws IOException {
+    public void send_delete_request_for_officer(String officerId) {
         String uri = "/disqualified-officers/delete/{officer_id}/internal";
 
         HttpHeaders headers = new HttpHeaders();
         CucumberContext.CONTEXT.set("contextId", "5234234234");
-        this.officerId = officerId;
         CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.NATURAL);
         headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
         headers.set("ERIC-Identity", "TEST-IDENTITY");
         headers.set("ERIC-Identity-Type", "KEY");
         headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
 
-        HttpEntity<String> request = new HttpEntity<String>(null, headers);
+        HttpEntity<String> request = new HttpEntity<>(null, headers);
 
         ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.DELETE, request, Void.class, officerId);
 
@@ -83,13 +79,13 @@ public class DisqualificationSteps {
     }
 
     @Then("the CHS Kafka API is not invoked")
-    public void chs_kafka_api_not_invoked() throws IOException {
-        verify(disqualifiedApiService, times(0)).invokeChsKafkaApi(any(ResourceChangedRequest.class));
+    public void chs_kafka_api_not_invoked() {
+        verify(disqualifiedApiService, never()).invokeChsKafkaApi(any(ResourceChangedRequest.class));
     }
 
     @Then("the CHS Kafka API is invoked with {string}")
     public void chs_kafka_api_invoked(String officerId) {
-        boolean isDelete = officerId.equals("id_to_delete") ? true : false;
+        boolean isDelete = officerId.equals("id_to_delete");
 
         verify(disqualifiedApiService).invokeChsKafkaApi(new ResourceChangedRequest(
             CucumberContext.CONTEXT.get("contextId"),
@@ -104,6 +100,12 @@ public class DisqualificationSteps {
     public void nothing_persisted_to_database() {
         List<DisqualificationDocument> disqDoc = repository.findAll();
         Assertions.assertThat(disqDoc).isEmpty();
+    }
+
+    @Then("a document is persisted to the database")
+    public void document_is_persisted_to_database() {
+        List<DisqualificationDocument> disqDoc = repository.findAll();
+        Assertions.assertThat(disqDoc).isNotEmpty();
     }
 
     @Then("I should receive {int} status code")

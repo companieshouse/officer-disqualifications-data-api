@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 
+import java.time.ZoneOffset;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
@@ -20,7 +20,6 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -30,22 +29,30 @@ public class DisqualifiedOfficerService {
 
     public static final String APPLICATION_NAME_SPACE = "disqualified-officers-data-api";
     private static final Logger logger = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS").withZone(ZoneId.of("Z"));
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
+            .withZone(ZoneOffset.UTC);
+    private static final String RESOURCE_NOT_FOUND_FOR_OFFICER_ID = "Resource not found for officer ID: %s";
 
-    @Autowired
-    private DisqualifiedOfficerRepository repository;
+    private final DisqualifiedOfficerRepository repository;
 
-    @Autowired
-    private NaturalDisqualifiedOfficerRepository naturalRepository;
+    private final NaturalDisqualifiedOfficerRepository naturalRepository;
 
-    @Autowired
-    private CorporateDisqualifiedOfficerRepository corporateRepository;
+    private final CorporateDisqualifiedOfficerRepository corporateRepository;
 
-    @Autowired
-    private DisqualificationTransformer transformer;
+    private final DisqualificationTransformer transformer;
 
-    @Autowired
-    DisqualifiedOfficerApiService disqualifiedOfficerApiService;
+    private final DisqualifiedOfficerApiService disqualifiedOfficerApiService;
+
+    public DisqualifiedOfficerService(DisqualifiedOfficerRepository repository,
+            NaturalDisqualifiedOfficerRepository naturalRepository,
+            CorporateDisqualifiedOfficerRepository corporateRepository, DisqualificationTransformer transformer,
+            DisqualifiedOfficerApiService disqualifiedOfficerApiService) {
+        this.repository = repository;
+        this.naturalRepository = naturalRepository;
+        this.corporateRepository = corporateRepository;
+        this.transformer = transformer;
+        this.disqualifiedOfficerApiService = disqualifiedOfficerApiService;
+    }
 
     /**
      * Save or update a natural disqualification
@@ -145,9 +152,8 @@ public class DisqualifiedOfficerService {
     }
 
     private boolean isLatestRecord(OffsetDateTime deltaAt, DisqualificationDocument existingDocument) {
-        // If the delta_at is empty/null OR the delta_at in the request is after the existing delta_at
-        return  StringUtils.isBlank(existingDocument.getDeltaAt()) ||
-                deltaAt.isAfter(ZonedDateTime.parse(existingDocument.getDeltaAt(), FORMATTER)
+        return StringUtils.isBlank(existingDocument.getDeltaAt()) ||
+                !deltaAt.isBefore(ZonedDateTime.parse(existingDocument.getDeltaAt(), FORMATTER)
                         .toOffsetDateTime());
     }
 
@@ -167,13 +173,6 @@ public class DisqualifiedOfficerService {
                     .ifPresentOrElse(document::setCreated,
                         () -> document.setCreated(new Created().setAt(document.getUpdated().getAt())));
 
-        disqualifiedOfficerApiService.invokeChsKafkaApi(
-                new ResourceChangedRequest(contextId, officerId,
-                        type, null, false));
-        logger.info(String.format("ChsKafka api CHANGED invoked updated successfully for context id: %s and officer id: %s",
-                contextId,
-                officerId));
-
         try {
             repository.save(document);
             logger.info(String.format("Disqualification is updated in MongoDb for context id: %s and officer id: %s",
@@ -182,6 +181,13 @@ public class DisqualifiedOfficerService {
         } catch (IllegalArgumentException illegalArgumentEx) {
             throw new BadRequestException(illegalArgumentEx.getMessage());
         }
+
+        disqualifiedOfficerApiService.invokeChsKafkaApi(
+                new ResourceChangedRequest(contextId, officerId,
+                        type, null, false));
+        logger.info(String.format("ChsKafka api CHANGED invoked updated successfully for context id: %s and officer id: %s",
+                contextId,
+                officerId));
     }
 
     public DisqualificationDocument retrieveDeleteDisqualification(String officerId) {
@@ -189,7 +195,7 @@ public class DisqualifiedOfficerService {
                 repository.findById(officerId);
         return disqualificationDocumentOptional.orElseThrow(
                 () -> new IllegalArgumentException(String.format(
-                        "Resource not found for officer ID: %s", officerId)));
+                        RESOURCE_NOT_FOUND_FOR_OFFICER_ID, officerId)));
     }
 
     public NaturalDisqualificationDocument retrieveNaturalDisqualification(String officerId) {
@@ -197,7 +203,7 @@ public class DisqualifiedOfficerService {
                 naturalRepository.findById(officerId);
         NaturalDisqualificationDocument disqualificationDocument = disqualificationDocumentOptional.orElseThrow(
                 () -> new IllegalArgumentException(String.format(
-                        "Resource not found for officer ID: %s", officerId)));
+                        RESOURCE_NOT_FOUND_FOR_OFFICER_ID, officerId)));
         if(disqualificationDocument.isCorporateOfficer()) {
             throw new IllegalArgumentException(String.format(
                     "Natural resource not found for officer ID: %s", officerId));
@@ -210,7 +216,7 @@ public class DisqualifiedOfficerService {
                 corporateRepository.findById(officerId);
         CorporateDisqualificationDocument disqualificationDocument = disqualificationDocumentOptional.orElseThrow(
                 () -> new IllegalArgumentException(String.format(
-                        "Resource not found for officer ID: %s", officerId)));
+                        RESOURCE_NOT_FOUND_FOR_OFFICER_ID, officerId)));
         if(!disqualificationDocument.isCorporateOfficer()) {
             throw new IllegalArgumentException(String.format(
                     "Corporate resource not found for officer ID: %s", officerId));
