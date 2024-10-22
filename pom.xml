@@ -18,8 +18,8 @@
             uk.gov.companieshouse.disqualifiedofficersdataapi.DisqualifiedOfficersDataApiApplication
         </start-class>
 
-        <maven-build-helper-plugin.version>3.5.0</maven-build-helper-plugin.version>
-        <spring.boot.version>3.3.2</spring.boot.version>
+        <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
+        <spring.boot.version>3.3.4</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 

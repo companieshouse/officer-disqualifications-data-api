@@ -114,9 +114,9 @@ public class DisqualificationSteps {
         Assertions.assertThat(expectedStatusCode).isEqualTo(statusCode);
     }
 
-    @Then("the disqualified officer with officer id {string} still exists in the database")
+    @Then("the disqualified officer with officer id {string} does not exist in the database")
     public void disqualified_officer_exists(String officerId) {
-        Assertions.assertThat(repository.existsById(officerId)).isTrue();
+        Assertions.assertThat(repository.existsById(officerId)).isFalse();
     }
 
 }
