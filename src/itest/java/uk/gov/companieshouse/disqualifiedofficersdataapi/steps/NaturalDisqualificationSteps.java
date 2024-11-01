@@ -71,6 +71,7 @@ public class NaturalDisqualificationSteps {
         NaturalDisqualificationDocument naturalDisqualification = new NaturalDisqualificationDocument();
         naturalDisqualification.setData(natData);
         naturalDisqualification.setId(officerId);
+        naturalDisqualification.setDeltaAt("20230925171003950844");
 
         mongoTemplate.save(naturalDisqualification);
         natData.setKind(KindEnum.NATURAL_DISQUALIFICATION);

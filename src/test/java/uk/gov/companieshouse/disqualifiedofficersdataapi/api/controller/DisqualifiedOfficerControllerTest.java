@@ -26,9 +26,11 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.config.ExceptionHandler
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.WebSecurityConfig;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.controller.DisqualifiedOfficerController;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DeleteDisqualifiedOfficerService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DisqualifiedOfficerService;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -53,12 +55,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {DisqualifiedOfficerController.class, ExceptionHandlerConfig.class})
 @Import({WebSecurityConfig.class})
 class DisqualifiedOfficerControllerTest {
+
     private static final String OFFICER_ID = "02588581";
     private static final String NATURAL = "natural";
     private static final String DELETE = "delete";
     private static final String NATURAL_URL = String.format("/disqualified-officers/%s/%s/internal", NATURAL, OFFICER_ID);
     private static final String NATURAL_GET_URL = String.format("/disqualified-officers/%s/%s", NATURAL, OFFICER_ID);
     private static final String DELETE_URL = String.format("/disqualified-officers/%s/%s/internal", DELETE, OFFICER_ID);
+    private static final String DELTA_AT = "20240925171003950844";
+    private static final String STALE_DELTA_AT = "20220925171003950844";
 
     @Autowired
     private MockMvc mockMvc;
@@ -68,6 +73,9 @@ class DisqualifiedOfficerControllerTest {
 
     @MockBean
     private DisqualifiedOfficerService disqualifiedOfficerService;
+
+    @MockBean
+    private DeleteDisqualifiedOfficerService deleteService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -310,14 +318,15 @@ class DisqualifiedOfficerControllerTest {
     void callDisqualifiedOfficerDeleteRequest() throws Exception {
 
         doNothing()
-                .when(disqualifiedOfficerService).deleteDisqualification(anyString(), anyString());
+                .when(deleteService).deleteDisqualification(anyString(), anyString(), anyString(), anyString());
 
         mockMvc.perform(delete(DELETE_URL)
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", "5342342")
                         .header("ERIC-Identity", "Test-Identity")
                         .header("ERIC-Identity-Type", "Key")
-                        .header("ERIC-Authorised-Key-Privileges", "internal-app"))
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                        .header("x-delta-at", DELTA_AT))
                 .andExpect(status().isOk());
     }
 
@@ -326,7 +335,41 @@ class DisqualifiedOfficerControllerTest {
     void callDisqualifiedOfficerDeleteRequestServiceUnavailable() throws Exception {
 
         doThrow(new ServiceUnavailableException("Service Unavailable - connection issues"))
-                .when(disqualifiedOfficerService).deleteDisqualification(anyString(), anyString());
+                .when(deleteService).deleteDisqualification(anyString(), anyString(), anyString(), anyString());
+
+        mockMvc.perform(delete(DELETE_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                        .header("x-delta-at", DELTA_AT))
+                .andExpect(status().isServiceUnavailable());
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer DELETE request - Stale Delta At - Conflict status code 409")
+    void callDisqualifiedOfficerDeleteRequestConflict() throws Exception {
+
+        doThrow(new ConflictException("Stale delta at"))
+                .when(deleteService).deleteDisqualification(anyString(), anyString(), anyString(), anyString());
+
+        mockMvc.perform(delete(DELETE_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", "5342342")
+                        .header("ERIC-Identity", "Test-Identity")
+                        .header("ERIC-Identity-Type", "Key")
+                        .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                        .header("x-delta-at", STALE_DELTA_AT))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("Disqualified Officer DELETE request - No Delta At on Header - Bad request status code 400")
+    void callDisqualifiedOfficerDeleteRequestBadRequest() throws Exception {
+
+        doNothing()
+                .when(deleteService).deleteDisqualification(anyString(), anyString(), anyString(), anyString());
 
         mockMvc.perform(delete(DELETE_URL)
                         .contentType(APPLICATION_JSON)
@@ -334,7 +377,7 @@ class DisqualifiedOfficerControllerTest {
                         .header("ERIC-Identity", "Test-Identity")
                         .header("ERIC-Identity-Type", "Key")
                         .header("ERIC-Authorised-Key-Privileges", "internal-app"))
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isBadRequest());
     }
 
     @Test

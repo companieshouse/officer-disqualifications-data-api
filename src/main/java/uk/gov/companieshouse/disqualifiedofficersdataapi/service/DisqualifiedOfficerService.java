@@ -1,13 +1,11 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 
+import static uk.gov.companieshouse.disqualifiedofficersdataapi.service.DateConverter.deltaAtToOffsetDateTime;
+
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
@@ -30,8 +28,6 @@ public class DisqualifiedOfficerService {
 
     public static final String APPLICATION_NAME_SPACE = "disqualified-officers-data-api";
     private static final Logger logger = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
-            .withZone(ZoneOffset.UTC);
     private static final String RESOURCE_NOT_FOUND_FOR_OFFICER_ID = "Resource not found for officer ID: %s";
     private static final String STALE_DELTA_AT_MESSAGE = "Delta at field on request is stale";
 
@@ -99,78 +95,9 @@ public class DisqualifiedOfficerService {
         }
     }
 
-    /**
-     * Find and delete a disqualification record.
-     *
-     * @param contextId passed into the call to changed-resource
-     * @param officerId used to find the document to delete
-     */
-    public void deleteDisqualification(String contextId, String officerId) {
-        DisqualificationDocument document = retrieveDeleteDisqualification(officerId);
-        if (document.isCorporateOfficer()) {
-            deleteCorporateDisqualification(contextId, officerId);
-        } else {
-            deleteNaturalDisqualification(contextId, officerId);
-        }
-    }
-
-    /**
-     * Delete a corporate disqualification record.
-     *
-     * @param contextId passed into the call to changed-resource
-     * @param officerId used to find the document to delete
-     */
-    private void deleteCorporateDisqualification(String contextId, String officerId) {
-        CorporateDisqualificationDocument document = retrieveCorporateDisqualification(officerId);
-
-        document.getData().setKind(KindEnum.CORPORATE_DISQUALIFICATION);
-
-        repository.delete(document);
-        logger.info(
-                String.format("Corporate disqualification is deleted in MongoDb for context id: %s and officer id: %s",
-                        contextId,
-                        officerId));
-
-        disqualifiedOfficerApiService.invokeChsKafkaApi(
-                new ResourceChangedRequest(contextId, officerId,
-                        DisqualificationResourceType.CORPORATE, document.getData(), true));
-        logger.info(
-                String.format("ChsKafka api DELETED invoked updated successfully for context id: %s and officer id: %s",
-                        contextId,
-                        officerId));
-    }
-
-    /**
-     * Delete a natural disqualification record.
-     *
-     * @param contextId passed into the call to changed-resource
-     * @param officerId used to find the document to delete
-     */
-    private void deleteNaturalDisqualification(String contextId, String officerId) {
-        NaturalDisqualificationDocument document = retrieveNaturalDisqualification(officerId);
-
-        document.getData().setKind(uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi.
-                KindEnum.NATURAL_DISQUALIFICATION);
-
-        repository.delete(document);
-        logger.info(
-                String.format("Natural disqualification is deleted in MongoDb for context id: %s and officer id: %s",
-                        contextId,
-                        officerId));
-
-        disqualifiedOfficerApiService.invokeChsKafkaApi(
-                new ResourceChangedRequest(contextId, officerId,
-                        DisqualificationResourceType.NATURAL, document.getData(), true));
-        logger.info(
-                String.format("ChsKafka api DELETED invoked updated successfully for context id: %s and officer id: %s",
-                        contextId,
-                        officerId));
-    }
-
-    private boolean isLatestRecord(OffsetDateTime deltaAt, DisqualificationDocument existingDocument) {
-        return StringUtils.isBlank(existingDocument.getDeltaAt()) ||
-                !deltaAt.isBefore(ZonedDateTime.parse(existingDocument.getDeltaAt(), FORMATTER)
-                        .toOffsetDateTime());
+    private boolean isLatestRecord(OffsetDateTime requestDeltaAt, DisqualificationDocument existingDocument) {
+        final String docDeltaAt = existingDocument.getDeltaAt();
+        return StringUtils.isBlank(docDeltaAt) || !requestDeltaAt.isBefore(deltaAtToOffsetDateTime(docDeltaAt));
     }
 
     /**
@@ -206,14 +133,6 @@ public class DisqualifiedOfficerService {
                 String.format("ChsKafka api CHANGED invoked updated successfully for context id: %s and officer id: %s",
                         contextId,
                         officerId));
-    }
-
-    public DisqualificationDocument retrieveDeleteDisqualification(String officerId) {
-        Optional<DisqualificationDocument> disqualificationDocumentOptional =
-                repository.findById(officerId);
-        return disqualificationDocumentOptional.orElseThrow(
-                () -> new IllegalArgumentException(String.format(
-                        RESOURCE_NOT_FOUND_FOR_OFFICER_ID, officerId)));
     }
 
     public NaturalDisqualificationDocument retrieveNaturalDisqualification(String officerId) {

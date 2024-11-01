@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +17,7 @@ import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificatio
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DeleteDisqualifiedOfficerService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DisqualifiedOfficerService;
 
 import uk.gov.companieshouse.logging.Logger;
@@ -25,11 +25,16 @@ import uk.gov.companieshouse.logging.Logger;
 @RestController
 public class DisqualifiedOfficerController {
 
-    @Autowired
-    private Logger logger;
-    @Autowired
-    private DisqualifiedOfficerService service;
+    private final Logger logger;
+    private final DisqualifiedOfficerService service;
+    private final DeleteDisqualifiedOfficerService deleteService;
 
+    public DisqualifiedOfficerController(Logger logger, DisqualifiedOfficerService service,
+            DeleteDisqualifiedOfficerService deleteService) {
+        this.logger = logger;
+        this.service = service;
+        this.deleteService = deleteService;
+    }
 
     /**
      * PUT request to save or update a Natural Disqualified Officer.
@@ -123,13 +128,15 @@ public class DisqualifiedOfficerController {
      * @param  officerId  the officer id to be deleted
      * @return return 200 status with empty body
      */
-    @DeleteMapping("/disqualified-officers/delete/{officer_id}/internal")
+    @DeleteMapping("/disqualified-officers/{officer_type}/{officer_id}/internal")
     public ResponseEntity<Void> deleteDisqualification(
             @RequestHeader("x-request-id") String contextId,
+            @RequestHeader("x-delta-at") String requestDeltaAt,
+            @PathVariable("officer_type") String officerType,
             @PathVariable("officer_id") String officerId) {
         logger.info(String.format(
                 "Deleting disqualified officer information for officer id %s", officerId));
-        service.deleteDisqualification(contextId, officerId);
+        deleteService.deleteDisqualification(contextId, officerId, requestDeltaAt, officerType);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
