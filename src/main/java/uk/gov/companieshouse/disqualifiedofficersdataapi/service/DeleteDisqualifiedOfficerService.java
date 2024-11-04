@@ -18,13 +18,13 @@ public class DeleteDisqualifiedOfficerService {
 
     private final DisqualifiedOfficerRepository repository;
     private final DisqualifiedOfficerApiService disqualifiedOfficerApiService;
-    private final DeletionDataFactory deletionDataFactory;
+    private final DeletionDataService deletionDataService;
 
     public DeleteDisqualifiedOfficerService(DisqualifiedOfficerRepository repository,
-            DisqualifiedOfficerApiService disqualifiedOfficerApiService, DeletionDataFactory deletionDataFactory) {
+            DisqualifiedOfficerApiService disqualifiedOfficerApiService, DeletionDataService deletionDataService) {
         this.repository = repository;
         this.disqualifiedOfficerApiService = disqualifiedOfficerApiService;
-        this.deletionDataFactory = deletionDataFactory;
+        this.deletionDataService = deletionDataService;
     }
 
     public void deleteDisqualification(String contextId, String officerId, String requestDeltaAt, String officerType) {
@@ -39,9 +39,9 @@ public class DeleteDisqualifiedOfficerService {
 
         Object data;
         if (type == DisqualificationResourceType.CORPORATE) {
-            data = deletionDataFactory.processCorporateDisqualificationData(officerId, requestDeltaAt);
+            data = deletionDataService.processCorporateDisqualificationData(officerId, requestDeltaAt);
         } else {
-            data = deletionDataFactory.processNaturalDisqualificationData(officerId, requestDeltaAt);
+            data = deletionDataService.processNaturalDisqualificationData(officerId, requestDeltaAt);
         }
         repository.deleteById(officerId);
         LOGGER.info(

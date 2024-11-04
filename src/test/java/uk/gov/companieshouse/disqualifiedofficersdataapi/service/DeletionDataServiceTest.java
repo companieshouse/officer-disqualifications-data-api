@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
@@ -27,7 +28,7 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDis
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.NaturalDisqualifiedOfficerRepository;
 
 @ExtendWith(MockitoExtension.class)
-class DeletionDataFactoryTest {
+class DeletionDataServiceTest {
 
     private static final String OFFICER_ID = "officer_id";
     private static final String REQUEST_DELTA_AT = "20240925171003950844";
@@ -35,14 +36,14 @@ class DeletionDataFactoryTest {
     private static final String STALE_DELTA_AT = "20220925171003950844";
 
     @InjectMocks
-    private DeletionDataFactory deletionDataFactory;
+    private DeletionDataService deletionDataService;
 
     @Mock
     private NaturalDisqualifiedOfficerRepository naturalRepository;
     @Mock
     private CorporateDisqualifiedOfficerRepository corporateRepository;
     @Mock
-    private DeltaAtProcessor deltaAtProcessor;
+    private DeltaAtHandler deltaAtHandler;
 
     @Mock
     private NaturalDisqualificationDocument naturalDisqualificationDocument;
@@ -58,16 +59,16 @@ class DeletionDataFactoryTest {
         // given
         when(naturalRepository.findById(anyString())).thenReturn(Optional.of(naturalDisqualificationDocument));
         when(naturalDisqualificationDocument.getDeltaAt()).thenReturn(EXISTING_DELTA_AT);
-        when(deltaAtProcessor.isRequestStale(anyString(), anyString())).thenReturn(false);
+        when(deltaAtHandler.isRequestStale(anyString(), anyString())).thenReturn(false);
         when(naturalDisqualificationDocument.getData()).thenReturn(naturalData);
 
         // when
-        Object actual = deletionDataFactory.processNaturalDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
+        Object actual = deletionDataService.processNaturalDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
 
         // then
         assertEquals(naturalData, actual);
         verify(naturalRepository).findById(OFFICER_ID);
-        verify(deltaAtProcessor).isRequestStale(REQUEST_DELTA_AT, EXISTING_DELTA_AT);
+        verify(deltaAtHandler).isRequestStale(REQUEST_DELTA_AT, EXISTING_DELTA_AT);
         verify(naturalData).setKind(NATURAL_DISQUALIFICATION);
         verifyNoInteractions(corporateRepository);
     }
@@ -78,7 +79,7 @@ class DeletionDataFactoryTest {
         when(naturalRepository.findById(anyString())).thenReturn(Optional.empty());
 
         // when
-        Object actual = deletionDataFactory.processNaturalDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
+        Object actual = deletionDataService.processNaturalDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
 
         // then
         assertNull(actual);
@@ -90,14 +91,30 @@ class DeletionDataFactoryTest {
         // given
         when(naturalRepository.findById(anyString())).thenReturn(Optional.of(naturalDisqualificationDocument));
         when(naturalDisqualificationDocument.getDeltaAt()).thenReturn(EXISTING_DELTA_AT);
-        when(deltaAtProcessor.isRequestStale(anyString(), anyString())).thenReturn(true);
+        when(deltaAtHandler.isRequestStale(anyString(), anyString())).thenReturn(true);
 
         // when
-        Executable ex = () -> deletionDataFactory.processNaturalDisqualificationData(OFFICER_ID, STALE_DELTA_AT);
+        Executable ex = () -> deletionDataService.processNaturalDisqualificationData(OFFICER_ID, STALE_DELTA_AT);
 
         // then
         assertThrows(ConflictException.class, ex);
-        verify(deltaAtProcessor).isRequestStale(STALE_DELTA_AT, EXISTING_DELTA_AT);
+        verify(deltaAtHandler).isRequestStale(STALE_DELTA_AT, EXISTING_DELTA_AT);
+        verify(naturalDisqualificationDocument, times(0)).getData();
+        verifyNoInteractions(corporateRepository);
+    }
+
+    @Test
+    void shouldThrowBadRequestExceptionWhenRequestTypeIsNaturalButMongoDocumentIsCorporate() {
+        // given
+        when(naturalRepository.findById(anyString())).thenReturn(Optional.of(naturalDisqualificationDocument));
+        when(naturalDisqualificationDocument.isCorporateOfficer()).thenReturn(true);
+
+        // when
+        Executable ex = () -> deletionDataService.processNaturalDisqualificationData(OFFICER_ID, STALE_DELTA_AT);
+
+        // then
+        assertThrows(BadRequestException.class, ex);
+        verifyNoInteractions(deltaAtHandler);
         verify(naturalDisqualificationDocument, times(0)).getData();
         verifyNoInteractions(corporateRepository);
     }
@@ -106,17 +123,18 @@ class DeletionDataFactoryTest {
     void shouldReturnCorporateDisqualificationData() {
         // given
         when(corporateRepository.findById(anyString())).thenReturn(Optional.of(corporateDisqualificationDocument));
+        when(corporateDisqualificationDocument.isCorporateOfficer()).thenReturn(true);
         when(corporateDisqualificationDocument.getDeltaAt()).thenReturn(EXISTING_DELTA_AT);
-        when(deltaAtProcessor.isRequestStale(anyString(), anyString())).thenReturn(false);
+        when(deltaAtHandler.isRequestStale(anyString(), anyString())).thenReturn(false);
         when(corporateDisqualificationDocument.getData()).thenReturn(corporateData);
 
         // when
-        Object actual = deletionDataFactory.processCorporateDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
+        Object actual = deletionDataService.processCorporateDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
 
         // then
         assertEquals(corporateData, actual);
         verify(corporateRepository).findById(OFFICER_ID);
-        verify(deltaAtProcessor).isRequestStale(REQUEST_DELTA_AT, EXISTING_DELTA_AT);
+        verify(deltaAtHandler).isRequestStale(REQUEST_DELTA_AT, EXISTING_DELTA_AT);
         verify(corporateData).setKind(CORPORATE_DISQUALIFICATION);
         verifyNoInteractions(naturalRepository);
     }
@@ -127,7 +145,7 @@ class DeletionDataFactoryTest {
         when(corporateRepository.findById(anyString())).thenReturn(Optional.empty());
 
         // when
-        Object actual = deletionDataFactory.processCorporateDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
+        Object actual = deletionDataService.processCorporateDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
 
         // then
         assertNull(actual);
@@ -138,15 +156,31 @@ class DeletionDataFactoryTest {
     void shouldThrowConflictExceptionWhenRequestIsStaleOnCorporateDelete() {
         // given
         when(corporateRepository.findById(anyString())).thenReturn(Optional.of(corporateDisqualificationDocument));
+        when(corporateDisqualificationDocument.isCorporateOfficer()).thenReturn(true);
         when(corporateDisqualificationDocument.getDeltaAt()).thenReturn(EXISTING_DELTA_AT);
-        when(deltaAtProcessor.isRequestStale(anyString(), anyString())).thenReturn(true);
+        when(deltaAtHandler.isRequestStale(anyString(), anyString())).thenReturn(true);
 
         // when
-        Executable ex = () -> deletionDataFactory.processCorporateDisqualificationData(OFFICER_ID, STALE_DELTA_AT);
+        Executable ex = () -> deletionDataService.processCorporateDisqualificationData(OFFICER_ID, STALE_DELTA_AT);
 
         // then
         assertThrows(ConflictException.class, ex);
-        verify(deltaAtProcessor).isRequestStale(STALE_DELTA_AT, EXISTING_DELTA_AT);
+        verify(deltaAtHandler).isRequestStale(STALE_DELTA_AT, EXISTING_DELTA_AT);
+        verify(corporateDisqualificationDocument, times(0)).getData();
+        verifyNoInteractions(naturalRepository);
+    }
+
+    @Test
+    void shouldThrowBadRequestExceptionWhenRequestTypeIsCorporateButMongoDocumentIsNatural() {
+        // given
+        when(corporateRepository.findById(anyString())).thenReturn(Optional.of(corporateDisqualificationDocument));
+
+        // when
+        Executable ex = () -> deletionDataService.processCorporateDisqualificationData(OFFICER_ID, STALE_DELTA_AT);
+
+        // then
+        assertThrows(BadRequestException.class, ex);
+        verifyNoInteractions(deltaAtHandler);
         verify(corporateDisqualificationDocument, times(0)).getData();
         verifyNoInteractions(naturalRepository);
     }

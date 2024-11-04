@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class DeltaAtProcessorTest {
+class DeltaAtHandlerTest {
 
-    private final DeltaAtProcessor deltaAtProcessor = new DeltaAtProcessor();
+    private final DeltaAtHandler deltaAtHandler = new DeltaAtHandler();
 
     @ParameterizedTest
     @CsvSource(value = {
@@ -18,6 +18,6 @@ class DeltaAtProcessorTest {
             "20230925171003950844 , 20230925171003950844 , false",
     }, nullValues = {"null"})
     void shouldReturnTrueWhenRequestIsStale(final String requestDeltaAt, final String documentDeltaAt, final boolean result) {
-        assertEquals(deltaAtProcessor.isRequestStale(requestDeltaAt, documentDeltaAt), result);
+        assertEquals(deltaAtHandler.isRequestStale(requestDeltaAt, documentDeltaAt), result);
     }
 }

@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DeltaAtProcessor {
+public class DeltaAtHandler {
 
     public boolean isRequestStale(final String requestDeltaAt, final String docDeltaAt) {
         return StringUtils.isNotBlank(docDeltaAt)
