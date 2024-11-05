@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DeleteRequestParameters;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 
@@ -55,8 +56,15 @@ class DeleteDisqualifiedOfficerServiceTest {
         when(deletionDataService.processCorporateDisqualificationData(anyString(), anyString())).thenReturn(dataObject);
         when(disqualifiedOfficerApiService.invokeChsKafkaApi(any())).thenReturn(successResponse);
 
+        DeleteRequestParameters deleteRequestParameters = DeleteRequestParameters.builder()
+                .contextId(CONTEXT_ID)
+                .officerId(OFFICER_ID)
+                .requestDeltaAt(REQUEST_DELTA_AT)
+                .officerType(CORPORATE)
+                .build();
+
         // when
-        service.deleteDisqualification(CONTEXT_ID, OFFICER_ID, REQUEST_DELTA_AT, CORPORATE);
+        service.deleteDisqualification(deleteRequestParameters);
 
         // then
         verify(deletionDataService).processCorporateDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
@@ -72,8 +80,15 @@ class DeleteDisqualifiedOfficerServiceTest {
         when(deletionDataService.processCorporateDisqualificationData(anyString(), anyString())).thenReturn(null);
         when(disqualifiedOfficerApiService.invokeChsKafkaApi(any())).thenReturn(successResponse);
 
+        DeleteRequestParameters deleteRequestParameters = DeleteRequestParameters.builder()
+                .contextId(CONTEXT_ID)
+                .officerId(OFFICER_ID)
+                .requestDeltaAt(REQUEST_DELTA_AT)
+                .officerType(CORPORATE)
+                .build();
+
         // when
-        service.deleteDisqualification(CONTEXT_ID, OFFICER_ID, REQUEST_DELTA_AT, CORPORATE);
+        service.deleteDisqualification(deleteRequestParameters);
 
         // then
         verify(deletionDataService).processCorporateDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
@@ -89,8 +104,15 @@ class DeleteDisqualifiedOfficerServiceTest {
         when(deletionDataService.processCorporateDisqualificationData(anyString(), anyString())).thenReturn(dataObject);
         when(disqualifiedOfficerApiService.invokeChsKafkaApi(any())).thenReturn(unsuccessfulResponse);
 
+        DeleteRequestParameters deleteRequestParameters = DeleteRequestParameters.builder()
+                .contextId(CONTEXT_ID)
+                .officerId(OFFICER_ID)
+                .requestDeltaAt(REQUEST_DELTA_AT)
+                .officerType(CORPORATE)
+                .build();
+
         // when
-        service.deleteDisqualification(CONTEXT_ID, OFFICER_ID, REQUEST_DELTA_AT, CORPORATE);
+        service.deleteDisqualification(deleteRequestParameters);
 
         // then
         verify(deletionDataService).processCorporateDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
@@ -106,8 +128,15 @@ class DeleteDisqualifiedOfficerServiceTest {
         when(deletionDataService.processNaturalDisqualificationData(anyString(), anyString())).thenReturn(dataObject);
         when(disqualifiedOfficerApiService.invokeChsKafkaApi(any())).thenReturn(successResponse);
 
+        DeleteRequestParameters deleteRequestParameters = DeleteRequestParameters.builder()
+                .contextId(CONTEXT_ID)
+                .officerId(OFFICER_ID)
+                .requestDeltaAt(REQUEST_DELTA_AT)
+                .officerType(NATURAL)
+                .build();
+
         // when
-        service.deleteDisqualification(CONTEXT_ID, OFFICER_ID, REQUEST_DELTA_AT, NATURAL);
+        service.deleteDisqualification(deleteRequestParameters);
 
         // then
         verify(deletionDataService).processNaturalDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
@@ -123,8 +152,15 @@ class DeleteDisqualifiedOfficerServiceTest {
         when(deletionDataService.processNaturalDisqualificationData(anyString(), anyString())).thenReturn(null);
         when(disqualifiedOfficerApiService.invokeChsKafkaApi(any())).thenReturn(successResponse);
 
+        DeleteRequestParameters deleteRequestParameters = DeleteRequestParameters.builder()
+                .contextId(CONTEXT_ID)
+                .officerId(OFFICER_ID)
+                .requestDeltaAt(REQUEST_DELTA_AT)
+                .officerType(NATURAL)
+                .build();
+
         // when
-        service.deleteDisqualification(CONTEXT_ID, OFFICER_ID, REQUEST_DELTA_AT, NATURAL);
+        service.deleteDisqualification(deleteRequestParameters);
 
         // then
         verify(deletionDataService).processNaturalDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
@@ -140,8 +176,15 @@ class DeleteDisqualifiedOfficerServiceTest {
         when(deletionDataService.processNaturalDisqualificationData(anyString(), anyString())).thenReturn(dataObject);
         when(disqualifiedOfficerApiService.invokeChsKafkaApi(any())).thenReturn(unsuccessfulResponse);
 
+        DeleteRequestParameters deleteRequestParameters = DeleteRequestParameters.builder()
+                .contextId(CONTEXT_ID)
+                .officerId(OFFICER_ID)
+                .requestDeltaAt(REQUEST_DELTA_AT)
+                .officerType(NATURAL)
+                .build();
+
         // when
-        service.deleteDisqualification(CONTEXT_ID, OFFICER_ID, REQUEST_DELTA_AT, NATURAL);
+        service.deleteDisqualification(deleteRequestParameters);
 
         // then
         verify(deletionDataService).processNaturalDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
@@ -159,9 +202,15 @@ class DeleteDisqualifiedOfficerServiceTest {
     }, nullValues = "null")
     void shouldThrowBadRequestWhenOfficerTypeIsInvalid(final String officerType) {
         // given
+        DeleteRequestParameters deleteRequestParameters = DeleteRequestParameters.builder()
+                .contextId(CONTEXT_ID)
+                .officerId(OFFICER_ID)
+                .requestDeltaAt(REQUEST_DELTA_AT)
+                .officerType(officerType)
+                .build();
 
         // when
-        Executable ex = () -> service.deleteDisqualification(CONTEXT_ID, OFFICER_ID, REQUEST_DELTA_AT, officerType);
+        Executable ex = () -> service.deleteDisqualification(deleteRequestParameters);
 
         // then
         assertThrows(BadRequestException.class, ex);

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DeleteRequestParameters;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 import uk.gov.companieshouse.logging.Logger;
@@ -27,7 +28,12 @@ public class DeleteDisqualifiedOfficerService {
         this.deletionDataService = deletionDataService;
     }
 
-    public void deleteDisqualification(String contextId, String officerId, String requestDeltaAt, String officerType) {
+    public void deleteDisqualification(DeleteRequestParameters deleteRequestParameters) {
+        final String officerType = deleteRequestParameters.officerType();
+        final String officerId = deleteRequestParameters.officerId();
+        final String requestDeltaAt = deleteRequestParameters.requestDeltaAt();
+        final String contextId = deleteRequestParameters.contextId();
+
         final DisqualificationResourceType type;
         try {
             type = DisqualificationResourceType.valueOfOfficerType(officerType);

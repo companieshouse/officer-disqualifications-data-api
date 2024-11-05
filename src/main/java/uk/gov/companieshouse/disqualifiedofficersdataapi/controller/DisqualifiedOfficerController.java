@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
+import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
-import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi.KindEnum;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.*;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DeleteDisqualifiedOfficerService;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DeleteRequestParameters;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DisqualifiedOfficerService;
-
 import uk.gov.companieshouse.logging.Logger;
 
 @RestController
@@ -39,9 +39,9 @@ public class DisqualifiedOfficerController {
     /**
      * PUT request to save or update a Natural Disqualified Officer.
      *
-     * @param  officerId  the id for the disqualified officer
-     * @param  requestBody  the request body containing disqualified officer data
-     * @return  no response
+     * @param officerId   the id for the disqualified officer
+     * @param requestBody the request body containing disqualified officer data
+     * @return no response
      */
     @PutMapping("/disqualified-officers/natural/{officer_id}/internal")
     public ResponseEntity<Void> naturalDisqualifiedOfficer(
@@ -59,13 +59,12 @@ public class DisqualifiedOfficerController {
     }
 
 
-
     /**
      * PUT request to save or update a Corporate Disqualified Officers.
      *
-     * @param  officerId  the id for the disqualified officer
-     * @param  requestBody  the request body containing disqualified officer data
-     * @return  no response
+     * @param officerId   the id for the disqualified officer
+     * @param requestBody the request body containing disqualified officer data
+     * @return no response
      */
     @PutMapping("/disqualified-officers/corporate/{officer_id}/internal")
     public ResponseEntity<Void> corporateDisqualifiedOfficer(
@@ -85,7 +84,7 @@ public class DisqualifiedOfficerController {
     /**
      * Retrieve natural disqualified officer information for a officer ID.
      *
-     * @param  officerId  the officer ID for the disqualification
+     * @param officerId the officer ID for the disqualification
      * @return NaturalDisqualificationDocument return natural disqualified officer information
      */
     @GetMapping("/disqualified-officers/natural/{officer_id}")
@@ -97,7 +96,7 @@ public class DisqualifiedOfficerController {
 
         NaturalDisqualificationDocument disqualification = service.retrieveNaturalDisqualification(officerId);
         disqualification.getData().setKind(uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi
-                        .KindEnum.NATURAL_DISQUALIFICATION);
+                .KindEnum.NATURAL_DISQUALIFICATION);
 
         return ResponseEntity.status(HttpStatus.OK).body(disqualification.getData());
     }
@@ -105,7 +104,7 @@ public class DisqualifiedOfficerController {
     /**
      * Retrieve corporate disqualified officer information for a officer ID.
      *
-     * @param  officerId  the officer ID for the disqualification
+     * @param officerId the officer ID for the disqualification
      * @return CorporateDisqualificationDocument return corporate disqualified officer information
      */
     @GetMapping("/disqualified-officers/corporate/{officer_id}")
@@ -125,7 +124,7 @@ public class DisqualifiedOfficerController {
     /**
      * Delete disqualification information for an officer id.
      *
-     * @param  officerId  the officer id to be deleted
+     * @param officerId the officer id to be deleted
      * @return return 200 status with empty body
      */
     @DeleteMapping("/disqualified-officers/{officer_type}/{officer_id}/internal")
@@ -136,7 +135,14 @@ public class DisqualifiedOfficerController {
             @PathVariable("officer_id") String officerId) {
         logger.info(String.format(
                 "Deleting disqualified officer information for officer id %s", officerId));
-        deleteService.deleteDisqualification(contextId, officerId, requestDeltaAt, officerType);
+
+        deleteService.deleteDisqualification(DeleteRequestParameters.builder()
+                .contextId(contextId)
+                .requestDeltaAt(requestDeltaAt)
+                .officerType(officerType)
+                .officerId(officerId)
+                .build());
+
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
