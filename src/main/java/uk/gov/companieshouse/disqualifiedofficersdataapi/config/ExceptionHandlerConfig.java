@@ -25,6 +25,10 @@ import uk.gov.companieshouse.logging.Logger;
 @ControllerAdvice
 public class ExceptionHandlerConfig {
 
+    private static final String TIMESTAMP = "timestamp";
+    private static final String MESSAGE = "message";
+    private static final String ATTRIBUTE = "javax.servlet.error.exception";
+
     private final Logger logger;
 
     @Autowired
@@ -45,9 +49,9 @@ public class ExceptionHandlerConfig {
                 HttpStatus.INTERNAL_SERVER_ERROR), ex);
 
         Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", "Unable to process the request.");
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
+        responseBody.put(TIMESTAMP, LocalDateTime.now());
+        responseBody.put(MESSAGE, "Unable to process the request.");
+        request.setAttribute(ATTRIBUTE, ex, 0);
         return new ResponseEntity<>(responseBody, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -64,9 +68,9 @@ public class ExceptionHandlerConfig {
                 HttpStatus.NOT_FOUND), ex);
 
         Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", "Resource not found.");
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
+        responseBody.put(TIMESTAMP, LocalDateTime.now());
+        responseBody.put(MESSAGE, "Resource not found.");
+        request.setAttribute(ATTRIBUTE, ex, 0);
         return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
     }
 
@@ -84,9 +88,9 @@ public class ExceptionHandlerConfig {
                 HttpStatus.METHOD_NOT_ALLOWED), ex);
 
         Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", "Unable to process the request.");
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
+        responseBody.put(TIMESTAMP, LocalDateTime.now());
+        responseBody.put(MESSAGE, "Unable to process the request.");
+        request.setAttribute(ATTRIBUTE, ex, 0);
         return new ResponseEntity<>(responseBody, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
@@ -104,9 +108,9 @@ public class ExceptionHandlerConfig {
                 HttpStatus.SERVICE_UNAVAILABLE), ex);
 
         Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", "Service unavailable.");
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
+        responseBody.put(TIMESTAMP, LocalDateTime.now());
+        responseBody.put(MESSAGE, "Service unavailable.");
+        request.setAttribute(ATTRIBUTE, ex, 0);
         return new ResponseEntity<>(responseBody, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
@@ -128,9 +132,9 @@ public class ExceptionHandlerConfig {
         logger.error("%s, response code: %s".formatted(msg, HttpStatus.BAD_REQUEST), ex);
 
         Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", msg);
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
+        responseBody.put(TIMESTAMP, LocalDateTime.now());
+        responseBody.put(MESSAGE, msg);
+        request.setAttribute(ATTRIBUTE, ex, 0);
 
         return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
     }
@@ -140,9 +144,9 @@ public class ExceptionHandlerConfig {
         logger.error(String.format("Conflict, response code: %s", HttpStatus.CONFLICT), ex);
 
         Map<String, Object> responseBody = new LinkedHashMap<>();
-        responseBody.put("timestamp", LocalDateTime.now());
-        responseBody.put("message", "Conflict.");
-        request.setAttribute("javax.servlet.error.exception", ex, 0);
+        responseBody.put(TIMESTAMP, LocalDateTime.now());
+        responseBody.put(MESSAGE, "Conflict.");
+        request.setAttribute(ATTRIBUTE, ex, 0);
         return new ResponseEntity<>(responseBody, HttpStatus.CONFLICT);
     }
 }

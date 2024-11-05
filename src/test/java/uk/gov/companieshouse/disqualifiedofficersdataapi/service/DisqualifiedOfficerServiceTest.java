@@ -1,8 +1,21 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +31,6 @@ import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
@@ -29,21 +41,6 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDis
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.NaturalDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.transform.DisqualificationTransformer;
-
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DisqualifiedOfficerServiceTest {

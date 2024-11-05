@@ -23,7 +23,7 @@ public enum DisqualificationResourceType {
     }
 
     public static DisqualificationResourceType valueOfOfficerType(final String input) {
-        return BY_OFFICER_TYPE.computeIfAbsent(input, (k) -> {
+        return BY_OFFICER_TYPE.computeIfAbsent(input, k -> {
             throw new IllegalArgumentException();
         });
     }
