@@ -58,6 +58,7 @@ class DeletionDataServiceTest {
     void shouldReturnNaturalDisqualificationData() {
         // given
         when(naturalRepository.findById(anyString())).thenReturn(Optional.of(naturalDisqualificationDocument));
+        when(naturalDisqualificationDocument.isCorporateOfficer()).thenReturn(false);
         when(naturalDisqualificationDocument.getDeltaAt()).thenReturn(EXISTING_DELTA_AT);
         when(deltaAtHandler.isRequestStale(anyString(), anyString())).thenReturn(false);
         when(naturalDisqualificationDocument.getData()).thenReturn(naturalData);
@@ -90,6 +91,7 @@ class DeletionDataServiceTest {
     void shouldThrowConflictExceptionWhenRequestIsStaleOnNaturalDelete() {
         // given
         when(naturalRepository.findById(anyString())).thenReturn(Optional.of(naturalDisqualificationDocument));
+        when(naturalDisqualificationDocument.isCorporateOfficer()).thenReturn(false);
         when(naturalDisqualificationDocument.getDeltaAt()).thenReturn(EXISTING_DELTA_AT);
         when(deltaAtHandler.isRequestStale(anyString(), anyString())).thenReturn(true);
 
@@ -174,6 +176,7 @@ class DeletionDataServiceTest {
     void shouldThrowBadRequestExceptionWhenRequestTypeIsCorporateButMongoDocumentIsNatural() {
         // given
         when(corporateRepository.findById(anyString())).thenReturn(Optional.of(corporateDisqualificationDocument));
+        when(corporateDisqualificationDocument.isCorporateOfficer()).thenReturn(false);
 
         // when
         Executable ex = () -> deletionDataService.processCorporateDisqualificationData(OFFICER_ID, STALE_DELTA_AT);
