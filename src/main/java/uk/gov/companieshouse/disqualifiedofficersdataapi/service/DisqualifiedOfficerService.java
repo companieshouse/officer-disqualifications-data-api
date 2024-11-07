@@ -1,8 +1,9 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 
-import static uk.gov.companieshouse.disqualifiedofficersdataapi.service.DateConverter.deltaAtToOffsetDateTime;
-
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,8 @@ public class DisqualifiedOfficerService {
 
     public static final String APPLICATION_NAME_SPACE = "disqualified-officers-data-api";
     private static final Logger logger = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
+            .withZone(ZoneOffset.UTC);
     private static final String RESOURCE_NOT_FOUND_FOR_OFFICER_ID = "Resource not found for officer ID: %s";
     private static final String STALE_DELTA_AT_MESSAGE = "Delta at field on request is stale";
 
@@ -95,9 +98,10 @@ public class DisqualifiedOfficerService {
         }
     }
 
-    private boolean isLatestRecord(OffsetDateTime requestDeltaAt, DisqualificationDocument existingDocument) {
-        final String docDeltaAt = existingDocument.getDeltaAt();
-        return StringUtils.isBlank(docDeltaAt) || !requestDeltaAt.isBefore(deltaAtToOffsetDateTime(docDeltaAt));
+    private boolean isLatestRecord(OffsetDateTime deltaAt, DisqualificationDocument existingDocument) {
+        return StringUtils.isBlank(existingDocument.getDeltaAt()) ||
+                !deltaAt.isBefore(ZonedDateTime.parse(existingDocument.getDeltaAt(), FORMATTER)
+                        .toOffsetDateTime());
     }
 
     /**
