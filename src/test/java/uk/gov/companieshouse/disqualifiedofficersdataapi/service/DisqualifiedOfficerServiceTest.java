@@ -55,27 +55,25 @@ class DisqualifiedOfficerServiceTest {
             .toOffsetDateTime();
     private static final String EXISTING_DELTA_AT = "20230925171003950844";
 
-    @Mock
-    private DisqualifiedOfficerRepository repository;
-
-    @Mock
-    private NaturalDisqualifiedOfficerRepository naturalRepository;
-
-    @Mock
-    private CorporateDisqualifiedOfficerRepository corporateRepository;
-
-    @Mock
-    private DisqualificationTransformer transformer;
-
-    @Mock
-    private DisqualifiedOfficerApiService disqualifiedOfficerApiService;
+    private InternalNaturalDisqualificationApi request;
+    private InternalCorporateDisqualificationApi corpRequest;
+    private DisqualificationDocument document;
 
     @InjectMocks
     private DisqualifiedOfficerService service;
 
-    private InternalNaturalDisqualificationApi request;
-    private InternalCorporateDisqualificationApi corpRequest;
-    private DisqualificationDocument document;
+    @Mock
+    private DisqualifiedOfficerRepository repository;
+    @Mock
+    private NaturalDisqualifiedOfficerRepository naturalRepository;
+    @Mock
+    private CorporateDisqualifiedOfficerRepository corporateRepository;
+    @Mock
+    private DisqualificationTransformer transformer;
+    @Mock
+    private DisqualifiedOfficerApiService disqualifiedOfficerApiService;
+    @Mock
+    private DeltaAtHandler deltaAtHandler;
 
     @BeforeEach
     void setUp() {
@@ -129,7 +127,7 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAt() {
+    void shouldProcessNaturalDisqualificationWhenRequestDeltaAtIsMoreRecent() {
         document.setCreated(new Created().setAt(LocalDateTime.now()));
         document.setDeltaAt(PAST_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
@@ -171,9 +169,10 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    void processNaturalDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAtAfterNow() {
+    void shouldNotProcessNaturalDisqualificationWhenRequestIsStale() {
         document.setDeltaAt(FUTURE_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(deltaAtHandler.isRequestStale(any(OffsetDateTime.class), any())).thenReturn(true);
 
         service.processNaturalDisqualification("", OFFICER_ID, request);
 
@@ -221,10 +220,11 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    void processCorporateDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAt() {
+    void shouldProcessCorporateDisqualificationWhenRequestDeltaAtIsMoreRecent() {
         document.setCreated(new Created().setAt(LocalDateTime.now()));
         document.setDeltaAt(PAST_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(deltaAtHandler.isRequestStale(any(OffsetDateTime.class), any())).thenReturn(false);
         when(transformer.transformCorporateDisqualifiedOfficer(OFFICER_ID, corpRequest)).thenReturn(document);
 
         service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
@@ -249,9 +249,10 @@ class DisqualifiedOfficerServiceTest {
     }
 
     @Test
-    void processCoporateDisqualificationSavesDisqualificationIfExistingDocumentHasValidDeltaAtAfterNow() {
+    void shouldNotProcessCorporateDisqualificationWhenRequestIsStale() {
         document.setDeltaAt(FUTURE_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
+        when(deltaAtHandler.isRequestStale(any(OffsetDateTime.class), any())).thenReturn(true);
 
         service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
 

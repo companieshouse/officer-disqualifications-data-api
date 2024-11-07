@@ -1,11 +1,6 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
@@ -29,30 +24,26 @@ public class DisqualifiedOfficerService {
 
     public static final String APPLICATION_NAME_SPACE = "disqualified-officers-data-api";
     private static final Logger logger = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
-            .withZone(ZoneOffset.UTC);
     private static final String RESOURCE_NOT_FOUND_FOR_OFFICER_ID = "Resource not found for officer ID: %s";
     private static final String STALE_DELTA_AT_MESSAGE = "Delta at field on request is stale";
 
     private final DisqualifiedOfficerRepository repository;
-
     private final NaturalDisqualifiedOfficerRepository naturalRepository;
-
     private final CorporateDisqualifiedOfficerRepository corporateRepository;
-
     private final DisqualificationTransformer transformer;
-
     private final DisqualifiedOfficerApiService disqualifiedOfficerApiService;
+    private final DeltaAtHandler deltaAtHandler;
 
     public DisqualifiedOfficerService(DisqualifiedOfficerRepository repository,
             NaturalDisqualifiedOfficerRepository naturalRepository,
             CorporateDisqualifiedOfficerRepository corporateRepository, DisqualificationTransformer transformer,
-            DisqualifiedOfficerApiService disqualifiedOfficerApiService) {
+            DisqualifiedOfficerApiService disqualifiedOfficerApiService, DeltaAtHandler deltaAtHandler) {
         this.repository = repository;
         this.naturalRepository = naturalRepository;
         this.corporateRepository = corporateRepository;
         this.transformer = transformer;
         this.disqualifiedOfficerApiService = disqualifiedOfficerApiService;
+        this.deltaAtHandler = deltaAtHandler;
     }
 
     /**
@@ -67,7 +58,8 @@ public class DisqualifiedOfficerService {
         Optional<DisqualificationDocument> existingDocument = repository.findById(officerId);
 
         if (existingDocument.isEmpty() ||
-                isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument.get())) {
+                !deltaAtHandler.isRequestStale(requestBody.getInternalData().getDeltaAt(),
+                        existingDocument.get().getDeltaAt())) {
             DisqualificationDocument document = transformer.transformNaturalDisqualifiedOfficer(officerId, requestBody);
             saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL,
                     existingDocument.orElse(null));
@@ -88,7 +80,8 @@ public class DisqualifiedOfficerService {
         Optional<DisqualificationDocument> existingDocument = repository.findById(officerId);
 
         if (existingDocument.isEmpty() ||
-                isLatestRecord(requestBody.getInternalData().getDeltaAt(), existingDocument.get())) {
+                !deltaAtHandler.isRequestStale(requestBody.getInternalData().getDeltaAt(),
+                        existingDocument.get().getDeltaAt())) {
             DisqualificationDocument document = transformer.transformCorporateDisqualifiedOfficer(officerId,
                     requestBody);
             saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE,
@@ -96,12 +89,6 @@ public class DisqualifiedOfficerService {
         } else {
             logger.info(STALE_DELTA_AT_MESSAGE);
         }
-    }
-
-    private boolean isLatestRecord(OffsetDateTime deltaAt, DisqualificationDocument existingDocument) {
-        return StringUtils.isBlank(existingDocument.getDeltaAt()) ||
-                !deltaAt.isBefore(ZonedDateTime.parse(existingDocument.getDeltaAt(), FORMATTER)
-                        .toOffsetDateTime());
     }
 
     /**
