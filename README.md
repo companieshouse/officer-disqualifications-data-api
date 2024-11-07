@@ -25,6 +25,11 @@ test                 Run all test-* targets (convenience method for developers)
 test-unit            Run unit tests
 ```
 
+## Building the docker image
+```bash
+mvn compile jib:dockerBuild
+```
+
 ## Endpoints
 | URL | Description |
 | --- | ----------- |

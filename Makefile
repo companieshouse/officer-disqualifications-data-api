@@ -36,7 +36,7 @@ build:
 FAIL_BUILD_CVSS_LIMIT ?= 0
 
 .PHONY: test
-test: test-integration test-unit
+test: clean test-integration test-unit
 
 .PHONY: test-unit
 test-unit:

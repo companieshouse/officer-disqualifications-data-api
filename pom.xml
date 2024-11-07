@@ -18,30 +18,30 @@
             uk.gov.companieshouse.disqualifiedofficersdataapi.DisqualifiedOfficersDataApiApplication
         </start-class>
 
-        <maven-build-helper-plugin.version>3.5.0</maven-build-helper-plugin.version>
-        <spring.boot.version>3.3.2</spring.boot.version>
+        <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
+        <spring.boot.version>3.3.5</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- tests -->
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
-        <jib-maven-plugin.version>3.4.1</jib-maven-plugin.version>
-        <io-cucumber.version>7.15.0</io-cucumber.version>
-        <test-containers.version>1.19.7</test-containers.version>
-        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.1</maven-failsafe-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
+        <io-cucumber.version>7.20.1</io-cucumber.version>
+        <test-containers.version>1.20.1</test-containers.version>
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
-        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 
         <!-- Internal -->
-        <structured-logging.version>3.0.7</structured-logging.version>
-        <private-api-sdk-java.version>4.0.154</private-api-sdk-java.version>
-        <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
+        <structured-logging.version>3.0.20</structured-logging.version>
+        <private-api-sdk-java.version>4.0.234</private-api-sdk-java.version>
+        <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
         <api-helper-java-library.version>3.0.1</api-helper-java-library.version>
-        <api-security-java.version>2.0.5</api-security-java.version>
+        <api-security-java.version>2.0.8</api-security-java.version>
 
         <!--sonar configuration-->
-        <sonar-maven-plugin.version>3.10.0.2594</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml,
             ${project.basedir}/target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
@@ -66,6 +66,15 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+        <!-- Transitive deps start here -->
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-core</artifactId>
+            <version>2.10.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Transitive deps end here -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -77,12 +86,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <!--Overriding spring-web version to remove vulnerability-->
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>6.1.12</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
