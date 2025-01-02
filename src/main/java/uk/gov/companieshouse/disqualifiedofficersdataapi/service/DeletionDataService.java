@@ -7,6 +7,7 @@ import static uk.gov.companieshouse.disqualifiedofficersdataapi.DisqualifiedOffi
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.NaturalDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.logging.Logger;
@@ -17,7 +18,7 @@ public class DeletionDataService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private static final String STALE_DELTA_AT_MESSAGE = "[delta_at] field on request is stale";
-    private static final String NULL_DATA_MESSAGE = "Document not found in database with officer id: [%s] - invoking CHS Kafka API with null data";
+    private static final String NULL_DATA_MESSAGE = "Document not found in MongoDB - invoking CHS Kafka API with null data";
 
     private final NaturalDisqualifiedOfficerRepository naturalRepository;
     private final CorporateDisqualifiedOfficerRepository corporateRepository;
@@ -34,19 +35,19 @@ public class DeletionDataService {
         return naturalRepository.findById(officerId)
                 .map(document -> {
                     if (document.isCorporateOfficer()) {
-                        LOGGER.error("Delete requested for natural officer when corporate officer found in DB");
+                        LOGGER.error("Delete requested for natural officer when corporate officer found in DB", DataMapHolder.getLogMap());
                         throw new BadRequestException(
                                 "Delete requested for natural officer when corporate officer found in DB");
                     }
 
                     if (deltaAtHandler.isRequestStale(requestDeltaAt, document.getDeltaAt())) {
-                        LOGGER.error(STALE_DELTA_AT_MESSAGE);
+                        LOGGER.error(STALE_DELTA_AT_MESSAGE, DataMapHolder.getLogMap());
                         throw new ConflictException(STALE_DELTA_AT_MESSAGE);
                     }
                     document.getData().setKind(NATURAL_DISQUALIFICATION);
                     return document.getData();
                 }).orElseGet(() -> {
-                    LOGGER.info(NULL_DATA_MESSAGE.formatted(officerId));
+                    LOGGER.info(NULL_DATA_MESSAGE, DataMapHolder.getLogMap());
                     return null;
                 });
     }
@@ -55,19 +56,19 @@ public class DeletionDataService {
         return corporateRepository.findById(officerId)
                 .map(document -> {
                     if (!document.isCorporateOfficer()) {
-                        LOGGER.error("Delete requested for corporate officer when natural officer found in DB");
+                        LOGGER.error("Delete requested for corporate officer when natural officer found in DB", DataMapHolder.getLogMap());
                         throw new BadRequestException(
                                 "Delete requested for corporate officer when natural officer found in DB");
                     }
 
                     if (deltaAtHandler.isRequestStale(requestDeltaAt, document.getDeltaAt())) {
-                        LOGGER.error(STALE_DELTA_AT_MESSAGE);
+                        LOGGER.error(STALE_DELTA_AT_MESSAGE, DataMapHolder.getLogMap());
                         throw new ConflictException(STALE_DELTA_AT_MESSAGE);
                     }
                     document.getData().setKind(CORPORATE_DISQUALIFICATION);
                     return document.getData();
                 }).orElseGet(() -> {
-                    LOGGER.info(NULL_DATA_MESSAGE.formatted(officerId));
+                    LOGGER.info(NULL_DATA_MESSAGE, DataMapHolder.getLogMap());
                     return null;
                 });
     }

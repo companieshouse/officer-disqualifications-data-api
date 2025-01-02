@@ -1,12 +1,18 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 
+import static uk.gov.companieshouse.disqualifiedofficersdataapi.DisqualifiedOfficersDataApiApplication.NAMESPACE;
+
 import java.util.Optional;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.disqualification.InternalCorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
@@ -22,9 +28,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Service
 public class DisqualifiedOfficerService {
 
-    public static final String APPLICATION_NAME_SPACE = "disqualified-officers-data-api";
-    private static final Logger logger = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
-    private static final String RESOURCE_NOT_FOUND_FOR_OFFICER_ID = "Resource not found for officer ID: %s";
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private static final String STALE_DELTA_AT_MESSAGE = "Delta at field on request is stale";
 
     private final DisqualifiedOfficerRepository repository;
@@ -64,7 +68,7 @@ public class DisqualifiedOfficerService {
             saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL,
                     existingDocument.orElse(null));
         } else {
-            logger.info(STALE_DELTA_AT_MESSAGE);
+            LOGGER.info(STALE_DELTA_AT_MESSAGE, DataMapHolder.getLogMap());
         }
     }
 
@@ -87,7 +91,7 @@ public class DisqualifiedOfficerService {
             saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE,
                     existingDocument.orElse(null));
         } else {
-            logger.info(STALE_DELTA_AT_MESSAGE);
+            LOGGER.info(STALE_DELTA_AT_MESSAGE, DataMapHolder.getLogMap());
         }
     }
 
@@ -103,6 +107,7 @@ public class DisqualifiedOfficerService {
             DisqualificationDocument document, DisqualificationResourceType type,
             DisqualificationDocument existingDocument) {
 
+        DataMapHolder.get().officerType(String.valueOf(type));
         Optional.ofNullable(existingDocument)
                 .map(DisqualificationDocument::getCreated)
                 .ifPresentOrElse(document::setCreated,
@@ -110,44 +115,44 @@ public class DisqualifiedOfficerService {
 
         try {
             repository.save(document);
-            logger.info(String.format("Disqualification is updated in MongoDb for context id: %s and officer id: %s",
-                    contextId,
-                    officerId));
-        } catch (IllegalArgumentException illegalArgumentEx) {
-            throw new BadRequestException(illegalArgumentEx.getMessage());
+        } catch (TransientDataAccessException ex) {
+            LOGGER.info("Recoverable MongoDB error when inserting/updating document", DataMapHolder.getLogMap());
+            throw new BadGatewayException("Recoverable MongoDB error when inserting/updating document", ex);
+        } catch (DataAccessException ex) {
+            LOGGER.error("MongoDB error when inserting/updating document", ex, DataMapHolder.getLogMap());
+            throw new BadGatewayException("MongoDB error when inserting/updating document", ex);
         }
 
         disqualifiedOfficerApiService.invokeChsKafkaApi(
                 new ResourceChangedRequest(contextId, officerId,
                         type, null, false));
-        logger.info(
-                String.format("ChsKafka api CHANGED invoked updated successfully for context id: %s and officer id: %s",
-                        contextId,
-                        officerId));
+        LOGGER.info("ChsKafka api CHANGED invoked successfully", DataMapHolder.getLogMap());
     }
 
     public NaturalDisqualificationDocument retrieveNaturalDisqualification(String officerId) {
-        Optional<NaturalDisqualificationDocument> disqualificationDocumentOptional =
-                naturalRepository.findById(officerId);
-        NaturalDisqualificationDocument disqualificationDocument = disqualificationDocumentOptional.orElseThrow(
-                () -> new IllegalArgumentException(String.format(
-                        RESOURCE_NOT_FOUND_FOR_OFFICER_ID, officerId)));
+        NaturalDisqualificationDocument disqualificationDocument =
+                naturalRepository.findById(officerId)
+                        .orElseGet(() -> {
+                            LOGGER.info("Record not found in MongoDB", DataMapHolder.getLogMap());
+                            throw new IllegalArgumentException("Record no found in MongoDB");
+                        });
         if (disqualificationDocument.isCorporateOfficer()) {
-            throw new IllegalArgumentException(String.format(
-                    "Natural resource not found for officer ID: %s", officerId));
+            LOGGER.info("Natural type record not found in MongoDB", DataMapHolder.getLogMap());
+            throw new IllegalArgumentException("Natural type record not found in MongoDB");
         }
         return disqualificationDocument;
     }
 
     public CorporateDisqualificationDocument retrieveCorporateDisqualification(String officerId) {
-        Optional<CorporateDisqualificationDocument> disqualificationDocumentOptional =
-                corporateRepository.findById(officerId);
-        CorporateDisqualificationDocument disqualificationDocument = disqualificationDocumentOptional.orElseThrow(
-                () -> new IllegalArgumentException(String.format(
-                        RESOURCE_NOT_FOUND_FOR_OFFICER_ID, officerId)));
+        CorporateDisqualificationDocument disqualificationDocument =
+                corporateRepository.findById(officerId)
+                        .orElseGet(() -> {
+                            LOGGER.info("Record not found in MongoDB", DataMapHolder.getLogMap());
+                            throw new IllegalArgumentException("Record no found in MongoDB");
+                        });
         if (!disqualificationDocument.isCorporateOfficer()) {
-            throw new IllegalArgumentException(String.format(
-                    "Corporate resource not found for officer ID: %s", officerId));
+            LOGGER.info("Corporate type record not found in MongoDB", DataMapHolder.getLogMap());
+            throw new IllegalArgumentException("Corporate type record not found in MongoDB");
         }
         return disqualificationDocument;
     }
