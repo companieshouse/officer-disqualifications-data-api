@@ -67,14 +67,19 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
-        <!-- Transitive deps start here -->
+        <!--section to provide specific versions of transitive dependencies to avoid vulnerabilities, if any exist-->
         <dependency>
-            <groupId>org.xmlunit</groupId>
-            <artifactId>xmlunit-core</artifactId>
-            <version>2.10.0</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.15</version>
             <scope>test</scope>
         </dependency>
-        <!-- Transitive deps end here -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.5.15</version>
+        </dependency>
+        <!--end transitive dependencies-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
