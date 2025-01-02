@@ -15,6 +15,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.InternalServerErrorException;
@@ -148,5 +149,16 @@ public class ExceptionHandlerConfig {
         responseBody.put(MESSAGE, "Conflict.");
         request.setAttribute(ATTRIBUTE, ex, 0);
         return new ResponseEntity<>(responseBody, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(value = {BadGatewayException.class})
+    public ResponseEntity<Object> handleBadGatewayException(Exception ex, WebRequest request) {
+        logger.error(String.format("BadGateway, response code: %s", HttpStatus.BAD_GATEWAY), ex);
+
+        Map<String, Object> responseBody = new LinkedHashMap<>();
+        responseBody.put(TIMESTAMP, LocalDateTime.now());
+        responseBody.put(MESSAGE, "BadGateway.");
+        request.setAttribute(ATTRIBUTE, ex, 0);
+        return new ResponseEntity<>(responseBody, HttpStatus.BAD_GATEWAY);
     }
 }
