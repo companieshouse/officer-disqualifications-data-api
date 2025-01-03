@@ -68,17 +68,6 @@
     </dependencyManagement>
     <dependencies>
         <!--section to provide specific versions of transitive dependencies to avoid vulnerabilities, if any exist-->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.15</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.5.15</version>
-        </dependency>
         <!--end transitive dependencies-->
 
         <dependency>
