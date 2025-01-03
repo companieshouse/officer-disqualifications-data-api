@@ -37,6 +37,6 @@ class LocalDateSerializerTest {
         serializer.serialize(date, generator, null);
 
         verify(generator).writeRawValue(dateString.capture());
-        assertEquals(dateString.getValue(), "ISODate(\"2020-01-01T00:00:00.000Z\")");
+        assertEquals("ISODate(\"2020-01-01T00:00:00.000Z\")", dateString.getValue());
     }
 }

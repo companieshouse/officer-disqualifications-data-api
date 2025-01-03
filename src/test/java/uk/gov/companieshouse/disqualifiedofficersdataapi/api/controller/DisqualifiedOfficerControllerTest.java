@@ -80,7 +80,7 @@ class DisqualifiedOfficerControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting()
             .excludeFieldsWithoutExposeAnnotation()
