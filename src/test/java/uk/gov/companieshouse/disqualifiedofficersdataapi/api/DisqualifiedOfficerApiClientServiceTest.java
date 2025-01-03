@@ -21,7 +21,6 @@ import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
-import uk.gov.companieshouse.logging.Logger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -42,9 +41,6 @@ class DisqualifiedOfficerApiClientServiceTest {
 
     @Mock
     private ApiResponse<Void> response;
-
-    @Mock
-    private Logger logger;
 
     @Mock
     private Supplier<String> dateGenerator;
