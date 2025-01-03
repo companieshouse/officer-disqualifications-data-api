@@ -53,8 +53,6 @@ public class DeleteDisqualifiedOfficerService {
         } else {
             data = deletionDataService.processNaturalDisqualificationData(officerId, requestDeltaAt);
         }
-        //TODO implement null check here to make sure that the deleteById Method isn't called on every delete request
-        // logging should be done before the event as gives context of what was being attempted before failure.
         if (data != null) {
             LOGGER.info("Attempting to delete disqualification", DataMapHolder.getLogMap());
             try {

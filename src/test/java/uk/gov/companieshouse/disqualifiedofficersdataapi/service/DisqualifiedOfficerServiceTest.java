@@ -10,12 +10,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +24,7 @@ import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificatio
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
@@ -41,6 +35,12 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDis
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.NaturalDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.transform.DisqualificationTransformer;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class DisqualifiedOfficerServiceTest {
@@ -160,11 +160,11 @@ class DisqualifiedOfficerServiceTest {
         document.setDeltaAt(PAST_DATE);
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(transformer.transformNaturalDisqualifiedOfficer(OFFICER_ID, request)).thenReturn(document);
-        when(repository.save(document)).thenThrow(new IllegalArgumentException());
+        when(repository.save(document)).thenThrow(new BadGatewayException("MongoDB error when deleting document"));
 
         Executable executable = () -> service.processNaturalDisqualification("", OFFICER_ID, request);
 
-        assertThrows(BadRequestException.class, executable);
+        assertThrows(BadGatewayException.class, executable);
         verify(disqualifiedOfficerApiService, never()).invokeChsKafkaApi(any());
     }
 

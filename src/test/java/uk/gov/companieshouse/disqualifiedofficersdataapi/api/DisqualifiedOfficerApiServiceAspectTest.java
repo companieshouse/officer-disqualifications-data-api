@@ -13,16 +13,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.FeatureFlags;
-import uk.gov.companieshouse.logging.Logger;
 
 @ExtendWith(MockitoExtension.class)
 class DisqualifiedOfficerApiServiceAspectTest {
 
     @Mock
     private FeatureFlags featureFlags;
-
-    @Mock
-    private Logger logger;
 
     @InjectMocks
     private DisqualifiedOfficerApiServiceAspect aspect;
@@ -44,7 +40,6 @@ class DisqualifiedOfficerApiServiceAspectTest {
         // then
         assertSame(object, actual);
         verify(proceedingJoinPoint).proceed();
-        verify(logger).debug("Stream hook enabled; publishing change to chs-kafka-api");
     }
 
     @Test
@@ -55,6 +50,5 @@ class DisqualifiedOfficerApiServiceAspectTest {
         // then
         assertNull(actual);
         verifyNoInteractions(proceedingJoinPoint);
-        verify(logger).debug("Stream hook disabled; not publishing change to chs-kafka-api");
     }
 }

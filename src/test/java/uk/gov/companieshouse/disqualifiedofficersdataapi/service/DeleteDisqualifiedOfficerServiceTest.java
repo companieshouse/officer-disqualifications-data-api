@@ -92,7 +92,7 @@ class DeleteDisqualifiedOfficerServiceTest {
 
         // then
         verify(deletionDataService).processCorporateDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
-        verify(repository).deleteById(OFFICER_ID);
+        verifyNoInteractions(repository);
         verify(disqualifiedOfficerApiService).invokeChsKafkaApi(
                 new ResourceChangedRequest(CONTEXT_ID, OFFICER_ID, DisqualificationResourceType.CORPORATE, null,
                         true));
@@ -147,7 +147,7 @@ class DeleteDisqualifiedOfficerServiceTest {
     }
 
     @Test
-    void shouldDeleteNaturalDisqualificationWhenFactoryReturnsNull() {
+    void shouldNotCallDeleteNaturalDisqualificationWhenFactoryReturnsNull() {
         // given
         when(deletionDataService.processNaturalDisqualificationData(anyString(), anyString())).thenReturn(null);
         when(disqualifiedOfficerApiService.invokeChsKafkaApi(any())).thenReturn(successResponse);
@@ -164,7 +164,7 @@ class DeleteDisqualifiedOfficerServiceTest {
 
         // then
         verify(deletionDataService).processNaturalDisqualificationData(OFFICER_ID, REQUEST_DELTA_AT);
-        verify(repository).deleteById(OFFICER_ID);
+        verifyNoInteractions(repository);
         verify(disqualifiedOfficerApiService).invokeChsKafkaApi(
                 new ResourceChangedRequest(CONTEXT_ID, OFFICER_ID, DisqualificationResourceType.NATURAL, null,
                         true));
