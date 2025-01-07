@@ -42,7 +42,7 @@ public class WebSecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers("/disqualified-officers/healthcheck");
+        return web -> web.ignoring().requestMatchers("/healthcheck");
     }
 
     @Bean
