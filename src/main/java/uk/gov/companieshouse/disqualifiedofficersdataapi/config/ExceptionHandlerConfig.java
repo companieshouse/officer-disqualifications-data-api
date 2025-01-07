@@ -17,6 +17,7 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestEx
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.InternalServerErrorException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.NotFoundException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -54,13 +55,13 @@ public class ExceptionHandlerConfig {
     }
 
     /**
-     * IllegalArgumentException exception handler.
+     * NotFoundException handler.
      *
      * @param ex      exception to handle.
      * @param request request.
      * @return error response to return.
      */
-    @ExceptionHandler(value = {IllegalArgumentException.class})
+    @ExceptionHandler(value = {NotFoundException.class})
     public ResponseEntity<Object> handleNotFoundException(Exception ex, WebRequest request) {
         LOGGER.error(String.format("Resource not found, response code: %s",
                 HttpStatus.NOT_FOUND), ex);

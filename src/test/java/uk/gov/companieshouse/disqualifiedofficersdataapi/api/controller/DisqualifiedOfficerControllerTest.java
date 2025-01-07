@@ -46,6 +46,7 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.controller.Disqualified
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.NotFoundException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DeleteRequestParameters;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
@@ -192,13 +193,13 @@ class DisqualifiedOfficerControllerTest {
 
 
     @Test
-    @DisplayName("Disqualified Officer PUT request - IllegalArgumentException status code 404 not found")
+    @DisplayName("Disqualified Officer PUT request - NotFoundException 404 not found")
     void callDisqualifiedOfficerPutRequestIllegalArgument() throws Exception {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
         request.setInternalData(new InternalDisqualificationApiInternalData());
         request.setExternalData(new NaturalDisqualificationApi());
 
-        doThrow(new IllegalArgumentException())
+        doThrow(NotFoundException.class)
                 .when(disqualifiedOfficerService).processNaturalDisqualification(anyString(), anyString(),
                         isA(InternalNaturalDisqualificationApi.class));
 
@@ -449,9 +450,9 @@ class DisqualifiedOfficerControllerTest {
     }
 
     @Test
-    @DisplayName("DisqualifiedOfficer GET request - DocumentNotFoundException status code 404 resource not found")
-    void callDisqualifiedOfficerGetRequestDocumentnotFound() throws Exception {
-        doThrow(new IllegalArgumentException("Document not found"))
+    @DisplayName("DisqualifiedOfficer GET request - NotFoundException status code 404 resource not found")
+    void callDisqualifiedOfficerGetRequestWhenDocumentNotFound() throws Exception {
+        doThrow(new NotFoundException("Document not found"))
                 .when(disqualifiedOfficerService).retrieveNaturalDisqualification(anyString());
 
         mockMvc.perform(get(NATURAL_GET_URL)
