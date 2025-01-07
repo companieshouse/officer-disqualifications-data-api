@@ -1,5 +1,10 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
 import org.assertj.core.api.Assertions;
@@ -15,14 +20,9 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
-import uk.gov.companieshouse.logging.Logger;
-
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DisqualifiedOfficerApiClientServiceTest {
@@ -41,9 +41,6 @@ class DisqualifiedOfficerApiClientServiceTest {
 
     @Mock
     private ApiResponse<Void> response;
-
-    @Mock
-    private Logger logger;
 
     @Mock
     private Supplier<String> dateGenerator;
@@ -84,7 +81,7 @@ class DisqualifiedOfficerApiClientServiceTest {
 
         setupExceptionScenario(503, "Service Unavailable");
 
-        assertThrows(ServiceUnavailableException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
+        assertThrows(BadGatewayException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
 
         verifyExceptionScenario();
     }
@@ -94,7 +91,7 @@ class DisqualifiedOfficerApiClientServiceTest {
 
         setupExceptionScenario(500, "Internal Service Error");
 
-        assertThrows(ServiceUnavailableException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
+        assertThrows(BadGatewayException.class, () -> disqualifiedOfficerApiService.invokeChsKafkaApi(resourceChangedRequest));
 
         verifyExceptionScenario();
     }

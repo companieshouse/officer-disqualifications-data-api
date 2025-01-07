@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class DisqualifiedNaturalOfficerReadConverterTest {
 
@@ -24,6 +25,7 @@ class DisqualifiedNaturalOfficerReadConverterTest {
         Document document = new Document("forename", OFFICER_NAME);
         NaturalDisqualificationApi disqualification = converter.convert(document);
 
-        assertEquals(disqualification.getForename(), OFFICER_NAME);
+        assertNotNull(disqualification);
+        assertEquals(OFFICER_NAME, disqualification.getForename());
     }
 }

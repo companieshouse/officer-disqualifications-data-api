@@ -10,7 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
@@ -31,7 +35,6 @@ import static uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractM
 
 public class CorporateDisqualificationSteps {
 
-    private String officerId;
     private String contextId;
 
     @Autowired
@@ -78,7 +81,7 @@ public class CorporateDisqualificationSteps {
     }
 
     @When("I send corporate GET request with officer Id {string}")
-    public void i_send_corporate_get_request_with_officer_id(String officerId) throws IOException {
+    public void i_send_corporate_get_request_with_officer_id(String officerId) {
         String uri = "/disqualified-officers/corporate/{officerId}";
 
         HttpHeaders headers = new HttpHeaders();
@@ -95,7 +98,7 @@ public class CorporateDisqualificationSteps {
 
 
     @When("I send corporate PUT request with payload {string} file")
-    public void i_send_corporate_put_request_with_payload(String dataFile) throws IOException {
+    public void i_send_corporate_put_request_with_payload(String dataFile) {
         String data = FileReaderUtil.readFile("src/itest/resources/json/input/" + dataFile + ".json");
 
         HttpHeaders headers = new HttpHeaders();
@@ -115,7 +118,6 @@ public class CorporateDisqualificationSteps {
         String officerId = "1234567891";
         ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, officerId);
 
-        this.officerId = officerId;
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
     }
 

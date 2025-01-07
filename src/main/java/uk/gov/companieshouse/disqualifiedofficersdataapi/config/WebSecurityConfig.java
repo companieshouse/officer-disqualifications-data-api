@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.config;
 
-import java.util.Arrays;
-import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,7 +14,8 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.csrf.CsrfFilter;
 import uk.gov.companieshouse.api.filter.CustomCorsFilter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.auth.EricTokenAuthenticationFilter;
-import uk.gov.companieshouse.logging.Logger;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -27,7 +26,7 @@ public class WebSecurityConfig {
      * Configure Http Security.
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, Logger logger) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity.httpBasic(AbstractHttpConfigurer::disable)
                 //REST APIs not enabled for cross site script headers
                 .csrf(AbstractHttpConfigurer::disable) //NO SONAR
@@ -36,7 +35,7 @@ public class WebSecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterAt(new EricTokenAuthenticationFilter(logger), BasicAuthenticationFilter.class)
+                .addFilterAt(new EricTokenAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .build();
     }
