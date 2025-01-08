@@ -194,7 +194,7 @@ class DisqualifiedOfficerControllerTest {
 
     @Test
     @DisplayName("Disqualified Officer PUT request - NotFoundException 404 not found")
-    void callDisqualifiedOfficerPutRequestIllegalArgument() throws Exception {
+    void callDisqualifiedOfficerPutRequestNotFound() throws Exception {
         InternalNaturalDisqualificationApi request = new InternalNaturalDisqualificationApi();
         request.setInternalData(new InternalDisqualificationApiInternalData());
         request.setExternalData(new NaturalDisqualificationApi());
