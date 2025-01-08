@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.disqualifiedofficersdataapi.api.controller;
+package uk.gov.companieshouse.disqualifiedofficersdataapi.controller;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,7 +42,6 @@ import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificatio
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.ExceptionHandlerConfig;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.WebSecurityConfig;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.controller.DisqualifiedOfficerController;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
