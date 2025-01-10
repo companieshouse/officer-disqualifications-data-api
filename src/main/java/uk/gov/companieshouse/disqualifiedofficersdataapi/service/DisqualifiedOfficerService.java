@@ -10,6 +10,7 @@ import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificatio
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.NotFoundException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
@@ -133,11 +134,11 @@ public class DisqualifiedOfficerService {
                 naturalRepository.findById(officerId)
                         .orElseGet(() -> {
                             LOGGER.info("Record not found in MongoDB", DataMapHolder.getLogMap());
-                            throw new IllegalArgumentException("Record no found in MongoDB");
+                            throw new NotFoundException("Record no found in MongoDB");
                         });
         if (disqualificationDocument.isCorporateOfficer()) {
             LOGGER.info("Natural type record not found in MongoDB", DataMapHolder.getLogMap());
-            throw new IllegalArgumentException("Natural type record not found in MongoDB");
+            throw new NotFoundException("Natural type record not found in MongoDB");
         }
         return disqualificationDocument;
     }
@@ -147,11 +148,11 @@ public class DisqualifiedOfficerService {
                 corporateRepository.findById(officerId)
                         .orElseGet(() -> {
                             LOGGER.info("Record not found in MongoDB", DataMapHolder.getLogMap());
-                            throw new IllegalArgumentException("Record no found in MongoDB");
+                            throw new NotFoundException("Record no found in MongoDB");
                         });
         if (!disqualificationDocument.isCorporateOfficer()) {
             LOGGER.info("Corporate type record not found in MongoDB", DataMapHolder.getLogMap());
-            throw new IllegalArgumentException("Corporate type record not found in MongoDB");
+            throw new NotFoundException("Corporate type record not found in MongoDB");
         }
         return disqualificationDocument;
     }

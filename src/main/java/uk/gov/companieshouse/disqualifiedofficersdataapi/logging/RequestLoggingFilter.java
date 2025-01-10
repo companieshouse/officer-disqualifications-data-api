@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.InternalServerErrorException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.NotFoundException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.RequestLogger;
@@ -39,7 +40,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter implements Reques
                 .orElse(UUID.randomUUID().toString()));
         try {
             filterChain.doFilter(request, response);
-        } catch (BadGatewayException | IllegalArgumentException | InternalServerErrorException ex) {
+        } catch (BadGatewayException | NotFoundException | InternalServerErrorException ex) {
             LOGGER.info("Recoverable exception: %s".formatted(Arrays.toString(ex.getStackTrace())),
                     DataMapHolder.getLogMap());
             throw ex;
