@@ -10,7 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
@@ -79,7 +83,7 @@ public class NaturalDisqualificationSteps {
     }
 
     @When("I send natural GET request with officer Id {string}")
-    public void i_send_natural_get_request_with_officer_id(String officerId) throws IOException {
+    public void i_send_natural_get_request_with_officer_id(String officerId) {
         String uri = "/disqualified-officers/natural/{officerId}";
 
         HttpHeaders headers = new HttpHeaders();
@@ -96,7 +100,7 @@ public class NaturalDisqualificationSteps {
 
 
     @When("I send natural PUT request with payload {string} file")
-    public void i_send_natural_put_request_with_payload(String dataFile) throws IOException {
+    public void i_send_natural_put_request_with_payload(String dataFile) {
         String data = FileReaderUtil.readFile("src/itest/resources/json/input/" + dataFile + ".json");
 
         HttpHeaders headers = new HttpHeaders();
@@ -120,7 +124,7 @@ public class NaturalDisqualificationSteps {
     }
 
     @When("I send natural PUT request without ERIC headers")
-    public void i_send_natural_put_request_without_ERIC_headers() throws IOException {
+    public void i_send_natural_put_request_without_ERIC_headers() {
         String data = FileReaderUtil.readFile("src/itest/resources/json/input/natural_disqualified_officer.json");
 
         HttpHeaders headers = new HttpHeaders();

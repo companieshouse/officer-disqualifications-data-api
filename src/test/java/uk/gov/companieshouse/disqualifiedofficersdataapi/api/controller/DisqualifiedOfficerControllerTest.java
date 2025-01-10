@@ -30,10 +30,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -47,11 +47,10 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestEx
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DeleteRequestParameters;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DeleteDisqualifiedOfficerService;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DeleteRequestParameters;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DisqualifiedOfficerService;
-import uk.gov.companieshouse.logging.Logger;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = DisqualifiedOfficerController.class)
@@ -72,19 +71,16 @@ class DisqualifiedOfficerControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private Logger logger;
-
-    @MockBean
+    @MockitoBean
     private DisqualifiedOfficerService disqualifiedOfficerService;
 
-    @MockBean
+    @MockitoBean
     private DeleteDisqualifiedOfficerService deleteService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting()
             .excludeFieldsWithoutExposeAnnotation()

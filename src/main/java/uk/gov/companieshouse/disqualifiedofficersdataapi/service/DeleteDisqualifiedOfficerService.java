@@ -2,10 +2,14 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.service;
 
 import static uk.gov.companieshouse.disqualifiedofficersdataapi.DisqualifiedOfficersDataApiApplication.NAMESPACE;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DeleteRequestParameters;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
@@ -22,7 +26,7 @@ public class DeleteDisqualifiedOfficerService {
     private final DeletionDataService deletionDataService;
 
     public DeleteDisqualifiedOfficerService(DisqualifiedOfficerRepository repository,
-            DisqualifiedOfficerApiService disqualifiedOfficerApiService, DeletionDataService deletionDataService) {
+                                            DisqualifiedOfficerApiService disqualifiedOfficerApiService, DeletionDataService deletionDataService) {
         this.repository = repository;
         this.disqualifiedOfficerApiService = disqualifiedOfficerApiService;
         this.deletionDataService = deletionDataService;
@@ -38,8 +42,8 @@ public class DeleteDisqualifiedOfficerService {
         try {
             type = DisqualificationResourceType.valueOfOfficerType(officerType);
         } catch (IllegalArgumentException ex) {
-            final String msg = "Invalid officer type used in URI: [%s]".formatted(officerType);
-            LOGGER.error(msg, ex);
+            final String msg = "Invalid officer type used in URI";
+            LOGGER.error(msg, ex, DataMapHolder.getLogMap());
             throw new BadRequestException(msg, ex);
         }
 
@@ -49,18 +53,22 @@ public class DeleteDisqualifiedOfficerService {
         } else {
             data = deletionDataService.processNaturalDisqualificationData(officerId, requestDeltaAt);
         }
-        repository.deleteById(officerId);
-        LOGGER.info(
-                String.format(
-                        "Disqualification deleted in MongoDb for context id: %s and officer id: %s",
-                        contextId,
-                        officerId));
-
-        disqualifiedOfficerApiService.invokeChsKafkaApi(new ResourceChangedRequest(
-                contextId, officerId, type, data, true));
-        LOGGER.info(
-                String.format("ChsKafka api DELETED invoked updated successfully for context id: %s and officer id: %s",
-                        contextId,
-                        officerId));
+        if (data != null) {
+            LOGGER.info("Attempting to delete disqualification", DataMapHolder.getLogMap());
+            try {
+                repository.deleteById(officerId);
+            } catch (TransientDataAccessException ex) {
+                LOGGER.info("Recoverable MongoDB error when deleting document", DataMapHolder.getLogMap());
+                throw new BadGatewayException("Recoverable MongoDB error when deleting document", ex);
+            } catch (DataAccessException ex) {
+                LOGGER.error("MongoDB error when deleting document", ex, DataMapHolder.getLogMap());
+                throw new BadGatewayException("MongoDB error when deleting document", ex);
+            }
+            disqualifiedOfficerApiService.invokeChsKafkaApi(new ResourceChangedRequest(
+                    contextId, officerId, type, data, true));
+        } else {
+            disqualifiedOfficerApiService.invokeChsKafkaApi(new ResourceChangedRequest(
+                    contextId, officerId, type, null, true));
+        }
     }
 }

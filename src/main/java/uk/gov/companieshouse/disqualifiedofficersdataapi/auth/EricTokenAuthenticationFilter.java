@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.auth;
 
+import static uk.gov.companieshouse.disqualifiedofficersdataapi.DisqualifiedOfficersDataApiApplication.NAMESPACE;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,17 +11,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Optional;
 
 public class EricTokenAuthenticationFilter extends OncePerRequestFilter {
 
-    private final Logger tokenLogger;
-
-    public EricTokenAuthenticationFilter(Logger logger) {
-        this.tokenLogger = logger;
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -29,7 +28,7 @@ public class EricTokenAuthenticationFilter extends OncePerRequestFilter {
         String ericIdentity = request.getHeader("ERIC-Identity");
 
         if (StringUtils.isBlank(ericIdentity)) {
-            tokenLogger.error("Request received without eric identity");
+            LOGGER.error("Request received without eric identity");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
@@ -38,13 +37,13 @@ public class EricTokenAuthenticationFilter extends OncePerRequestFilter {
 
         if (!("key".equalsIgnoreCase(ericIdentityType)
                 || ("oauth2".equalsIgnoreCase(ericIdentityType)))) {
-            tokenLogger.error("Request received without correct eric identity type");
+            LOGGER.error("Request received without correct eric identity type");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
         if (!isKeyAuthorised(request, ericIdentityType)) {
-            tokenLogger.info("Supplied key does not have sufficient privilege for the action");
+            LOGGER.info("Supplied key does not have sufficient privilege for the action");
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }

@@ -1,9 +1,9 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.config;
 
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 
 /**
@@ -15,6 +15,6 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficer
 @ActiveProfiles({"test"})
 public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
 
-    @MockBean
+    @MockitoBean
     public DisqualifiedOfficerApiService disqualifiedOfficerApiService;
 }
