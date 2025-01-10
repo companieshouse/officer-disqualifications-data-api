@@ -33,7 +33,7 @@ mvn compile jib:dockerBuild
 ## Endpoints
 | URL | Description |
 | --- | ----------- |
-| /disqualified-officers/healthcheck | Health check URL returns 200 if service is running |
+| /healthcheck | Health check URL returns 200 if service is running |
 | /disqualified-officers/natural/{officerId}/internal | Save or update a natural disqualified officer record |
 | /disqualified-officers/corporate/{officerId}/internal | Save or update a corporate disqualified officer record |
 
@@ -45,12 +45,11 @@ The code present in this repository is used to define and deploy a dockerised co
 This is done by calling a [module](https://github.com/companieshouse/terraform-modules/tree/main/aws/ecs) from terraform-modules. Application specific attributes are injected and the service is then deployed using Terraform via the CICD platform 'Concourse'.
 
 
-Application specific attributes | Value                                | Description
-:---------|:-----------------------------------------------------------------------------|:-----------
-**ECS Cluster**        |public-data                                      | ECS cluster (stack) the service belongs to
-**Load balancer**      |{env}-chs-apichgovuk <br> {env}-chs-apichgovuk-private                                                    | The load balancer that sits in front of the service
-**Concourse pipeline**     |[Pipeline link](https://ci-platform.companieshouse.gov.uk/teams/team-development/pipelines/disqualified-officers-data-api) <br> [Pipeline code](https://github.com/companieshouse/ci-pipelines/blob/master/pipelines/ssplatform/team-development/disqualified-officers-data-api)                                  | Concourse pipeline link in shared services
-
+| Application specific attributes | Value                                                                                                                                                                                                                                                                            | Description                                         |
+|:--------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------|
+| **ECS Cluster**                 | public-data                                                                                                                                                                                                                                                                      | ECS cluster (stack) the service belongs to          |
+| **Load balancer**               | {env}-chs-apichgovuk <br> {env}-chs-apichgovuk-private                                                                                                                                                                                                                           | The load balancer that sits in front of the service |
+| **Concourse pipeline**          | [Pipeline link](https://ci-platform.companieshouse.gov.uk/teams/team-development/pipelines/disqualified-officers-data-api) <br> [Pipeline code](https://github.com/companieshouse/ci-pipelines/blob/master/pipelines/ssplatform/team-development/disqualified-officers-data-api) | Concourse pipeline link in shared services          |
 
 ### Contributing
 - Please refer to the [ECS Development and Infrastructure Documentation](https://companieshouse.atlassian.net/wiki/spaces/DEVOPS/pages/4390649858/Copy+of+ECS+Development+and+Infrastructure+Documentation+Updated) for detailed information on the infrastructure being deployed.
