@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,10 +20,10 @@ import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
+import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @ExtendWith(MockitoExtension.class)
 class DisqualifiedOfficerApiClientServiceTest {
@@ -43,9 +44,6 @@ class DisqualifiedOfficerApiClientServiceTest {
     private ApiResponse<Void> response;
 
     @Mock
-    private Supplier<String> dateGenerator;
-
-    @Mock
     private Function<ResourceChangedRequest, ChangedResource> mapper;
 
     @Mock
@@ -54,8 +52,16 @@ class DisqualifiedOfficerApiClientServiceTest {
     @Mock
     private ChangedResource changedResource;
 
+    @Mock
+    private HttpClient httpClient;
+
     @InjectMocks
     private DisqualifiedOfficerApiService disqualifiedOfficerApiService;
+
+    @BeforeEach
+    void setup() {
+        when(internalApiClient.getHttpClient()).thenReturn(httpClient);
+    }
 
     @Test
     void should_invoke_chs_kafka_endpoint_successfully() throws ApiErrorResponseException {
