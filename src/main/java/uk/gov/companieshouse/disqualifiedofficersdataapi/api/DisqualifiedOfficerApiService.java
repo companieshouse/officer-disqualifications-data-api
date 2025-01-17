@@ -44,6 +44,7 @@ public class DisqualifiedOfficerApiService {
     public ApiResponse<Void> invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
         InternalApiClient internalApiClient = apiClientService.getInternalApiClient();
         internalApiClient.setBasePath(chsKafkaUrl);
+        internalApiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
 
         PrivateChangedResourcePost changedResourcePost =
                 internalApiClient.privateChangedResourceHandler().postChangedResource(
